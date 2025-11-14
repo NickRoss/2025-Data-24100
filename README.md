@@ -154,7 +154,7 @@ Course Notes can be found linked inside each lesson plan.
 | 5: SQLite & Management Commands | <ul><li>SQLite</li><li>Management Commands</li><li>CRUD</li><li>POST Requests</li></ul> | <ul><li>[Project Part 3 Due](./project_assignments/part_3.md)</li><li>[Quiz 4A](./quiz/quiz4A.pdf)/[Quiz 4B](./quiz/quiz4B.pdf)</li><li>[Answer Key](./quiz/quiz4AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_5.md)</li></ul> |
 | 6: Static Analysis, CRUD & Logging | <ul><li>Static Analysis</li><li>Ruff & Pre-commit</li><li>More CRUD</li><li>Logging</li></ul> | <ul><li>[Project Part 4 Due](./project_assignments/part_4.md)</li><li>[Quiz 5A](./quiz/quiz5A.pdf)</li><li>[Answer Key](./quiz/quiz5AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_6.md)</li></ul> |
 | 7: Adding Features | <ul><li>Logging in Python</li><li>Autodocs with MkDocs</li></ul> | <ul><li>[Project Part 5 Due](./project_assignments/part_5.md)</li><li>[Quiz 6A](./quiz/quiz6A.pdf)</li><li>[Answer Key](./quiz/quiz6AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_7.md)</li></ul> |
-| 8: MCP | <ul><li>MCP</li></ul> | <ul><li>Project Part VI</li><li>Quiz \#7</li></ul>  | |
+| 8: MCP | <ul><li>MCP</li></ul> | <ul><li>[Project Part 7 Due](./project_assignments/part_7.md)</li><li>Quiz \#7</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_8.md)</li></ul> |
 | 9: MCP (cont.) and Testing | <ul><li>MCP</li><li>Testing</li></ul> | <ul><li>Project Part VII</li><li>Quiz \#8</li></ul>  | |
 | 10: Finals Week |  | <ul><li>Final Project Assignment</li><li>In person Final</li></ul>  | |
 

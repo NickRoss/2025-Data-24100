@@ -2,7 +2,7 @@
 
 This document outlines the requirements for the next part of our data serving API.
 
-### Coding standards
+### Coding Standards
 
 During the quarter, you will be expected to adhere to the coding standards found [here](https://github.com/dsi-clinic/the-clinic/blob/main/coding-standards/coding-standards.md) and we will frequently use [this rubric](https://github.com/dsi-clinic/the-clinic/blob/main/rubrics/final-technical-cleanup.md) as a checklist for your code.
 
@@ -12,7 +12,7 @@ During this quarter we will be using branches and pull requests in order to subm
 
 ### Grading
 
-All grading will be done based on a specific commit hash off of the main branch. At the time that an assignment is due, students must submit the commit hash associated with their commit to Canvas. You need to submit the full commit hash, which is a 40-digit hash of letters and numbers. It will generally look something like this: `2a2a59af9feacbdd2cd772884b24641c3b75dff7`.
+All grading will be done based on a specific commit hash off of the main branch. At the time that an assignment is due, students must submit the commit hash associated with their commit to Canvas. You need to submit the _full_ commit hash which is a 40-digit-long hash of letters and numbers. It will generally look something like this: `2a2a59af9feacbdd2cd772884b24641c3b75dff7`.
 
 To find the commit hash, you can either use the command line or check GitHub’s commit history.
 
@@ -56,7 +56,7 @@ CREATE TABLE stocks_owned (
    symbol TEXT NOT NULL,
    purchase_date DATE NOT NULL,
    sale_date DATE NOT NULL,
-   number_of_shares INTEGER NOT NULL,
+   number_of_shares INTEGER NOT NULL
 );
 ```
 
@@ -75,7 +75,7 @@ CREATE TABLE stocks_owned (
 | `accounts` | DELETE | This will delete an account. Request body should contain a JSON object `{ 'account_id' : INT }` | The request should respond with a JSON object of the form `{ 'account_id' : INT }`. | This should delete the account and all stocks associated with the account. If the account does not exist, then it should return a status code of 404. If the account does exist and is deleted it should return a status code of 204. |
 | `accounts/<INT>` | GET | This lists all stocks owned by an account. The integer in the URL should correspond to the account ID. | The response should contain, in the body, a JSON object of the form `{ 'account_id' : INT, 'name' : string, 'stock_holdings' : [{'symbol' : str, 'purchase_date' : str, 'sale_date' : str, 'number_of_shares': int}, ...] }`. Note the `stock_holdings` are a list of JSON objects. | If the account does not exist then it should return a 404. If the account does not hold any stocks the `stock_holdings` should be an empty list. |
 | `stocks/<symbol>` | GET | This should list details of all stock holdings across all accounts. | The response should be a JSON object of the form: `{ 'symbol': str, 'holdings': [{'account_id' : int, 'purchase_date' : str, 'sale_date' : str, 'number_of_shares': int }, ...] }`. This is a dictionary that contains a list inside the `holdings` key. | If there are no holdings associated with the stock it should return an empty list. The status code should be 200. |
-| `stocks` | POST | Request body should contain a JSON object of the form `{ 'account_id' : int, 'symbol': str, 'purchase_date' : str, 'sale_date': str, 'number_of_shares': INT }` | This should return the appropriate status code and nothing more. | An account can own the same stock multiple times with the same or different dates. Account ID and symbol are not to be assumed unique. A 201 status code should be returned upon success. If the date is not a valid date (not a trading day), then return a 400. |
+| `stocks` | POST | Request body should contain a JSON object of the form `{ 'account_id' : int, 'symbol': str, 'purchase_date' : str, 'sale_date': str, 'number_of_shares': INT }` | This should return the appropriate status code and nothing more. | An account can own the same stock multiple times with the same or different dates. Account ID and symbol are not to be assumed unique. A 201 status code should be returned upon success. If either the purchase_date or sale_date is not a valid trading day, then return a 400. |
 | `stocks` | DELETE | Request body should contain a JSON object of the form `{ 'account_id' : int, 'symbol': str, 'purchase_date' : str, 'sale_date': str, 'number_of_shares': INT }` | This should return the appropriate status code and nothing else. | This should delete a single holding from an account. Note that if the full information (dates, account, and symbol) does not match, then a 404 should be returned. If the delete is successful then it should return a 204. |
 | `accounts/return/<int>` | GET | | This should return the nominal return (how much the account made) across all their holdings. The format should be `{ 'account_id' : int, 'return': float }`. More information on the calculation is below. | If the account ID does not exist it should return status code 404; otherwise it should return 200. |
 
@@ -89,22 +89,27 @@ CREATE TABLE stocks_owned (
 
 $$ \mathrm{return} = \sum_{\mathrm{holdings}} \mathrm{num\_shares} \left( \mathrm{close}_{\mathrm{sales\_date}} - \mathrm{open}_{\mathrm{purchase\_date}} \right) $$
 
-- To determine a "valid" date when adding a stock to an account you should verify that the symbol-date combination exists in the data. If the combination does not exist, then return a 400. This is important since if the date does not exist then calculating the return would not be possible.
+- To determine a "valid" date when adding a stock to an account you should verify that both the `purchase_date` and `sale_date` symbol-date combinations exist in the data. If either combination does not exist, then return a 400. This is important since if either date does not exist then calculating the return would not be possible.
 
 - You should not be able to add stocks to an account that does not exist.
 
-### Additional fixes
+### Additional Fixes
 
-Please correct all of the feedback for Part IV. A portion of the grade will be set to making sure that your code continues to pass those standards.
+Please correct all of the feedback for Part V. A portion of the grade will be set to making sure that your code continues to pass the standards set by Part V.
 
 ## How will this be graded
 
 - We will check out the code at the commit hash that you submit.
 - All of the previous coding standards will be checked, and all of the previous APIs (`v1` and `v2`) will also be tested.
-- Your code will also be read over to make sure that it conforms to the standards laid out in class. If you want to receive full credit, make sure that your code has sound logic, is easy to read, maintains a good separation of concerns, and does not violate the DRY principle.
+- We will run `ruff`, using the `pyproject.toml` file here to make sure that your code conforms to the standards therein.
+- We will also verify that the `.pre-commit-config.yaml` is in the repo and able to be installed and used.
 - We will run the `make` commands outlined above and verify that they work according to the standards set out above.
 - We will run an autograder on the endpoints to make sure that they return the correct data and information.
+- Your code will also be read over to make sure that it conforms to the standards laid out in class. If you want to receive full credit, make sure that your code has sound logic, is easy to read, maintains a good separation of concerns, and does not violate the DRY principle.
 - Finally, your code will also be read to make sure that all documentation is up to date and that the code has a consistent set of abstraction standards.
+- There should be no `print` statements. Everything should be logged with an _appropriate_ level.
+- All documented code needs to have good faith level of effort that briefly explains the required purpose. Doc strings that say `This is the doc string` or other low-effort submissions will be graded accordingly.
+- Your code should also be responsive to changes requested by previous submissions. If you received feedback previously to make a change to the code this change should be present.
 - No errors or warnings should occur in normal operations.
 - Extraneous code, such as that generated by an LLM doing nothing, will be heavily penalized. 
 - The database file itself should not be committed to the repo.
