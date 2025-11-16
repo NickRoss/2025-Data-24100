@@ -14,84 +14,76 @@ During this quarter we will be using branches and pull requests in order to subm
 
 All grading will be done based on a specific commit hash off of the main branch. At the time that an assignment is due, students must submit the commit hash associated with their commit to Canvas. You need to submit the _full_ commit hash which is a 40-digit-long hash of letters and numbers. It will generally look something like this: `2a2a59af9feacbdd2cd772884b24641c3b75dff7`.
 
-To find the commit hash, you can either use the command line or check GitHub’s commit history.
+To find the commit hash, you can either use the command line or check GitHub's commit history.
 
 Note that any changes requested in the grading of the previous part need to be corrected.
 
-## Part VI: Accounts and returns
+## Part VI: Adding tests and autodocs
 
-The goal of this assignment is to generate an account system for people to track their stock ownership over this time period. 
+- Your code must conform to all the requirements of all previous parts, including [Part V](./part_5.md).
 
-Specifically, we will create endpoints that:
-1. Add stocks to an account
-2. Remove stocks from an account
-3. Add accounts
-4. Delete accounts
-5. Calculate the return of the stocks owned by a specific account
+### Autodocs
 
-Your code must conform to all the requirements of all previous parts, including [Part V](./part_5.md) 
+Using the `mkdocs` package, please set up autodocs. Similar to the lecture example, please create:
 
-### Specifications
+  1. An `about` page which includes your names and light biographical details. By "light," I mean only what you are willing to share publicly. Or you can just make up a short bio. Make this look nice and use some HTML tags to organize it. You will be graded on making it look professional and clean. A wall of text without any formatting or text with grammar/readability errors will result in a lower grade.
+  2. An `index` page which contains a brief description of the project and what you have done. This should be short and sweet — but also look nice. Please add at least one image, using HTML tags to make the image look well-formatted.
+  3. A `docs` page consisting of documentation generated from the code. All functions need to be accessible via the docs (including functions from the tests), so verify that all files were appropriately processed. Note: This documentation needs to be well written; it should be descriptive of what the code is doing. While there are quite a few "boilerplate" functions that will not need any description beyond a sentence, functions which contain logic should be explained. 
+
+Please refer to the notes about how to set up autodocs. When the autodoc server is run, it should be accessible on port 4040. Start it via `make autodocs`. 
+
+### Tests
+
+Leveraging the `pytest` library, please write end-to-end tests for every `v1` and `v2` route. Note: This does _not_ include `v3` routes. 
+
+For each route you need to write a schema test using the `jsonschema` library. This should be a complete schema for what is returned and should include status code. There are 3 `v1` routes (0–2) and 6 `v2` routes (3–8), for a total of 9 test functions.
+
+Note: When you name the tests, use a naming convention which identifies the route based on the numbers above. So the `v1` routes should have names like `test_0_v1_row_count`, `test_1_v1_...`, `test_2_v1_...` where the enumerated numbers align with the numbers in parentheses above. 
+
+Please also write tests which do the following:
+- Send a request without any API key and verify that the returned response is correct (for one `v1` route and one `v2` route). This is two different calls within a single test function (test number 9).
+- Send a request against `/api/v2/{YEAR}` with an incorrect year (such as 1980) and verify that it returns the correct status code (test number 10).
+- Send a request with an invalid API key and verify that the returned response is correct (for one `v1` route and one `v2` route). This is two different calls within a single test function (test number 11).
+
+- Adding up the above, there should be 9 + 1 + 1 + 1 = 12 test functions in your test suite. Please make sure to name them properly. All of these tests should both reflect the rubric as well as pass.
+
+- In terms of names, they should all follow the convention: `test_{test-number:int}_{whatever you want to name it}`. You can name them whatever you would like as long as it follows good naming practices.
+
+- You will also need to install `pytest-cov` to generate the coverage report (required).
+
+- You can find a breakdown of all tests and their numbers in the chart here:
+
+| Test Number | Route | Info | 
+| --- | --- | --- |
+| 0 | `/api/v1/row_count` | Schema Test | 
+| 1 | `/api/v1/unique_nyse_stock_count` | Schema Test | 
+| 2 | `/api/v1/unique_nasdaq_stock_count` | Schema Test | 
+| 3 | `/api/v2/{YEAR}` | Schema Test | 
+| 4 | `/api/v2/open/{SYMBOL}` | Schema Test | 
+| 5 | `/api/v2/close/{SYMBOL}` | Schema Test |  
+| 6 | `/api/v2/high/{SYMBOL}` | Schema Test | 
+| 7 | `/api/v2/low/{SYMBOL}` | Schema Test | 
+| 8 | `/api/v2/high_low/{SYMBOL}` | Schema Test |
+| 9 | `v1` and `v2` | One route of each `v`-type to test a missing API Key |
+| 10 | `/api/v2/{YEAR}` | Incorrect year |
+| 11 | `v1` and `v2` | One route of each `v`-type to test an _invalid_ API Key |
+
+### Specifications:
+
+- You do NOT need to use type hints for this project. If want to experiment with type hints on some functions that is totally fine. Your grade will not be affected if you have some functions with type hints and some functions without type hints. 
+- Your documentation will be read over for grammar. Make sure that you are consistent in tense and usage. 
+- All functions in your code need to have proper documentation. You need to make sure that your autodocs build is able to find all of the required files and processes them appropriately.
 
 #### Updates to Make / Docker
-- In addition to existing `make` commands your `db_create` command now needs to create an `accounts` and `stocks_owned` table with the data definition spelled out below. When you create these they should be empty.
-- Implement these changes using the `db_manage.py` command.
-- Please also create a Make command (DB management) called `db_clean_account` which only resets the `accounts` and `stocks_owned` tables. This should maintain the table, but delete all rows from inside of it. It should be another management command.
-
-
-#### Table definitions
-
-- There will be two tables as defined below:
-
-```sql
-CREATE TABLE accounts (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL
-);
-```
-
-```sql
-CREATE TABLE stocks_owned (
-   account_id INTEGER,
-   symbol TEXT NOT NULL,
-   purchase_date DATE NOT NULL,
-   sale_date DATE NOT NULL,
-   number_of_shares INTEGER NOT NULL
-);
-```
-
-#### Updates to Flask
-
-- None of the previous endpoints should change from the specification. We will be adding a `v3` set of endpoints.
-
-- Given a base URL of `/api/v3/`, implement the following endpoints with the functionality below. Note that all requests need to go through the same authentication as `v1` and `v2` (e.g., using the `DATA-241-API-KEY` environment variable). If the key is invalid or not present in the header, the request should return a status code of 401.
-
-- Note on date formatting: In the database tables, all dates are stored as `date` types. When they are sent in the request and when they are returned they should all be formatted as a string in `Y-m-d` format.
-
-| Endpoint name | Request Type | Request Info | Expected Response | Other Notes |
-| --- | --- | --- | --- | --- | 
-| `accounts` | GET |  This lists all accounts. | It should respond with a JSON-formatted list of all the accounts. Each item in the list is of the form: `{ 'account_id' : INT, 'name' : str }` | If no accounts exist it should return an empty list. Upon success, the status code should be 200. |
-| `accounts` | POST | This is to create an account. The request body should contain a JSON object `{ 'name' : str }` and it should add a row to the accounts table with that name. | The request should respond with a JSON object of the form `{ 'account_id' : INT }` which is the account ID for this newly created user. | It should return a status code of 201 if an account is created, 409 if the name already exists. |
-| `accounts` | DELETE | This will delete an account. Request body should contain a JSON object `{ 'account_id' : INT }` | The request should respond with a JSON object of the form `{ 'account_id' : INT }`. | This should delete the account and all stocks associated with the account. If the account does not exist, then it should return a status code of 404. If the account does exist and is deleted it should return a status code of 204. |
-| `accounts/<INT>` | GET | This lists all stocks owned by an account. The integer in the URL should correspond to the account ID. | The response should contain, in the body, a JSON object of the form `{ 'account_id' : INT, 'name' : string, 'stock_holdings' : [{'symbol' : str, 'purchase_date' : str, 'sale_date' : str, 'number_of_shares': int}, ...] }`. Note the `stock_holdings` are a list of JSON objects. | If the account does not exist then it should return a 404. If the account does not hold any stocks the `stock_holdings` should be an empty list. |
-| `stocks/<symbol>` | GET | This should list details of all stock holdings across all accounts. | The response should be a JSON object of the form: `{ 'symbol': str, 'holdings': [{'account_id' : int, 'purchase_date' : str, 'sale_date' : str, 'number_of_shares': int }, ...] }`. This is a dictionary that contains a list inside the `holdings` key. | If there are no holdings associated with the stock it should return an empty list. The status code should be 200. |
-| `stocks` | POST | Request body should contain a JSON object of the form `{ 'account_id' : int, 'symbol': str, 'purchase_date' : str, 'sale_date': str, 'number_of_shares': INT }` | This should return the appropriate status code and nothing more. | An account can own the same stock multiple times with the same or different dates. Account ID and symbol are not to be assumed unique. A 201 status code should be returned upon success. If either the purchase_date or sale_date is not a valid trading day, then return a 400. |
-| `stocks` | DELETE | Request body should contain a JSON object of the form `{ 'account_id' : int, 'symbol': str, 'purchase_date' : str, 'sale_date': str, 'number_of_shares': INT }` | This should return the appropriate status code and nothing else. | This should delete a single holding from an account. Note that if the full information (dates, account, and symbol) does not match, then a 404 should be returned. If the delete is successful then it should return a 204. |
-| `accounts/return/<int>` | GET | | This should return the nominal return (how much the account made) across all their holdings. The format should be `{ 'account_id' : int, 'return': float }`. More information on the calculation is below. | If the account ID does not exist it should return status code 404; otherwise it should return 200. |
+- There are no changes to the Dockerfile, but there are two additional Make commands required.
+- `make autodocs` should build and start the `mkdocs` server on port 4040 (externally). When `make autodocs` is running, it should be possible to go to the local server and see the autodocs server running.
+- `make tests` should run the Python test suite as described above, reporting coverage using `pytest-cov`.
 
 #### Additional details
 
-- As mentioned in class, I strongly advise you to add an index to the `stocks` table to make sure that your code is performant.
-- All dates will be in the format `Y-m-d`, as in the previous parts.
-- A trading day is defined as one that is in the dataset. If the date exists in the `stocks` table (e.g., in the original ZIP files) then you should consider it a trading day.
-- No request should take more than a few seconds (say 5). If it does, you should add an index to the table to make sure that the query is faster.
-- To calculate the return, take the `close` price for the stock on the day that it was sold and subtract the `open` price for the day that it was bought. Multiply this by the number of shares owned. Since an account can have multiple stock holdings, the above calculation should be repeated for all stocks owned by the specific account.
-
-$$ \mathrm{return} = \sum_{\mathrm{holdings}} \mathrm{num\_shares} \left( \mathrm{close}_{\mathrm{sales\_date}} - \mathrm{open}_{\mathrm{purchase\_date}} \right) $$
-
-- To determine a "valid" date when adding a stock to an account you should verify that both the `purchase_date` and `sale_date` symbol-date combinations exist in the data. If either combination does not exist, then return a 400. This is important since if either date does not exist then calculating the return would not be possible.
-
-- You should not be able to add stocks to an account that does not exist.
+- Please make sure to go back to the original specification for the entire API. As part of the review, another look at all of these will be completed.
+- You are welcome to add any additional tests, just make sure that the 12 tests above follow the standards previously defined.
+- **Make sure that your database is not in the repository.** The database needs to be generated by the user.
 
 ### Additional Fixes
 
@@ -100,11 +92,11 @@ Please correct all of the feedback for Part V. A portion of the grade will be se
 ## How will this be graded
 
 - We will check out the code at the commit hash that you submit.
-- All of the previous coding standards will be checked, and all of the previous APIs (`v1` and `v2`) will also be tested.
-- We will run `ruff`, using the `pyproject.toml` file here to make sure that your code conforms to the standards therein.
+- All of the previous coding standards will be checked, and all of the previous APIs (`v1`, `v2`, `v3`, and `v4`) will also be tested.
+- We will run `ruff`, using the [`pyproject.toml`](pyproject.toml) file here to make sure that your code conforms to the standards therein.
 - We will also verify that the `.pre-commit-config.yaml` is in the repo and able to be installed and used.
 - We will run the `make` commands outlined above and verify that they work according to the standards set out above.
-- We will run an autograder on the endpoints to make sure that they return the correct data and information.
+- We will run an autograder on the endpoints to make sure that they return the correct data and information. This includes types and casing.
 - Your code will also be read over to make sure that it conforms to the standards laid out in class. If you want to receive full credit, make sure that your code has sound logic, is easy to read, maintains a good separation of concerns, and does not violate the DRY principle.
 - Finally, your code will also be read to make sure that all documentation is up to date and that the code has a consistent set of abstraction standards.
 - There should be no `print` statements. Everything should be logged with an _appropriate_ level.
@@ -113,4 +105,4 @@ Please correct all of the feedback for Part V. A portion of the grade will be se
 - No errors or warnings should occur in normal operations.
 - Extraneous code, such as that generated by an LLM doing nothing, will be heavily penalized. 
 - The database file itself should not be committed to the repo.
-- You should never load the entire dataset into a DataFrame. You need to use SQL commands to select only the relevant data.
+- You should never load the entire dataset into a DataFrame. You need to use SQL commands to select only the relevant data. No pandas based SQL commands are to be used. 
