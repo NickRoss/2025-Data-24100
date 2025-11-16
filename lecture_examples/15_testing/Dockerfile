@@ -1,14 +1,15 @@
-FROM python:3.10.15-bookworm
+FROM astral/uv:python3.13-bookworm
 
 WORKDIR /app
 RUN apt-get update 
 RUN apt-get install -y sqlite3
 
+# Copy pyproject.toml for dependency management
+COPY pyproject.toml .
 
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
+# Create a virtual environment and install dependencies
+RUN uv venv
+RUN uv sync
 
 ENV PYTHONUNBUFFERED=1
-WORKDIR /app/src
-CMD ["python", "flask_app.py"]
+CMD ["uv", "run", "python", "flask_app.py"]
