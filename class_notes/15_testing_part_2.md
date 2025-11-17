@@ -9,7 +9,7 @@ title: "Testing Part II & Docker Compose"
   - `makefile` update
   - `test/test.py` file
 
-## Requirements.txt
+## Added Requirements
 
 - We will need to add three packages to get our testing to work: `pytest`, `pytest-cov`, and `pytest-order`.
 - `pytest` is the core testing framework.
