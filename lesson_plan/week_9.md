@@ -12,7 +12,7 @@
 - [MCP Python SDK Documentation](https://github.com/modelcontextprotocol/python-sdk)
 - [MCP Protocol Specification](https://modelcontextprotocol.io/specification)
 - [Claude Desktop MCP Setup](https://docs.anthropic.com/claude/docs/use-mcp-with-claude-desktop)
-- [Cursor MCP Integration](https://cursor.sh/docs/mcp)
+- [Cursor MCP Integration](https://cursor.com/docs/context/mcp)
 - Lecture example: `lecture_examples/17_MCP`
 
 ## Learning Objectives

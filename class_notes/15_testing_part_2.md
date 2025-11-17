@@ -346,20 +346,18 @@ def test_13_add_stock(client):
 services:
   flask-app:
     build:
-      context: .
-      dockerfile: flask_app/Dockerfile
+      context: ./flask_app
+      dockerfile: Dockerfile
     container_name: bball_flask_app
     ports:
       - "4000:5000"
     volumes:
       - ./flask_app:/app
-      - ./pyproject.toml:/app/pyproject.toml
-      - ${RAW_DATA_DIR:-./flask_app/data/raw_data}:/app/src/data/raw_data
+      - ${RAW_DATA_DIR}:/app/src/data/raw_data
     environment:
       - DB_PATH=/app/data/bball.db
       - DATA_DIR=/app/data
       - DATA_241_API_KEY=${DATA_241_API_KEY}
-      - RAW_DATA_DIR=/app/src/data/raw_data
     networks:
       - bball-network
 
@@ -370,9 +368,6 @@ services:
       - "8080:8080"
     environment:
       - SWAGGER_JSON_URL=http://localhost:4000/docs/openapi.json
-      - SWAGGER_JSON=/docs/openapi.json
-      - URL=http://localhost:4000/docs/openapi.json
-      - VALIDATOR_URL=null
     depends_on:
       - flask-app
     networks:
@@ -386,16 +381,18 @@ networks:
 ### Key Components
 
 - **services**: Each service is a container definition. In this example, we have two services: `flask-app` and `swagger-ui`.
-- **build**: How to build the image (context and dockerfile). The `flask-app` service builds from a Dockerfile, while `swagger-ui` uses a pre-built image.
+- **build**: How to build the image (context and dockerfile). 
+  - The `flask-app` service builds from `context: ./flask_app` with `dockerfile: Dockerfile` (relative to the context)
+  - The `swagger-ui` service uses a pre-built image (`swaggerapi/swagger-ui:latest`) instead of building
 - **container_name**: Explicitly names the container (e.g., `bball_flask_app`, `bball_swagger_ui`).
 - **ports**: Port mappings (host:container). Flask app maps port 4000 on host to 5000 in container; Swagger UI maps 8080:8080.
-- **volumes**: Directory mounts. The `flask-app` service has multiple volumes:
-  - `./flask_app:/app` - Mounts the Flask app directory
-  - `./pyproject.toml:/app/pyproject.toml` - Mounts the pyproject.toml file
-  - Uses environment variable substitution `${RAW_DATA_DIR:-./flask_app/data/raw_data}` with a default value
+- **volumes**: Directory mounts. The `flask-app` service has two volumes:
+  - `./flask_app:/app` - Mounts the Flask app directory for live code changes
+  - `${RAW_DATA_DIR}:/app/src/data/raw_data` - Mounts raw data directory using an environment variable from the host
 - **environment**: Environment variables. Can include:
-  - Static values (e.g., `DB_PATH=/app/data/bball.db`)
+  - Static values (e.g., `DB_PATH=/app/data/bball.db`, `DATA_DIR=/app/data`)
   - Environment variable references from the host (e.g., `DATA_241_API_KEY=${DATA_241_API_KEY}`)
+  - The `${RAW_DATA_DIR}` variable is used in volumes and must be set on the host
 - **networks**: Network configuration for inter-container communication. Both services are on `bball-network`.
 - **depends_on**: Service dependencies (start order). `swagger-ui` depends on `flask-app`, so Flask starts first.
 - **image**: For services that don't need building, you can use a pre-built image (like `swaggerapi/swagger-ui:latest`).
@@ -414,8 +411,7 @@ networks:
 
 ### Backgrounding and Detached Mode (-d)
 
-- By default, `docker compose up` runs in the foreground and attaches to the terminal, showing logs from all services.
-- Adding the `-d` flag runs containers in **detached mode** (background):
+- By default, `docker compose up` runs in the _background_ (**detached mode**) since we added the `-d` flag 
   - Containers run in the background
   - Your terminal is immediately freed up
   - You can continue working while containers run
@@ -431,18 +427,6 @@ networks:
   - Short-lived tasks or one-time commands
   - When you want to see real-time log output
   
-- **Example:**
-  ```bash
-  # Foreground mode (logs visible, terminal blocked)
-  docker compose up
-  
-  # Detached mode (background, terminal free)
-  docker compose up -d
-  
-  # View logs after starting in detached mode
-  docker compose logs -f flask-app
-  ```
-
 ## Container Networking
 
 - Containers in the same Docker Compose network can communicate using service names as hostnames.
