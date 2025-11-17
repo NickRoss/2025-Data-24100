@@ -1,7 +1,13 @@
 """Tests for the Flask application."""
 
+import sys
+from pathlib import Path
+
 import pytest
 from jsonschema import validate
+
+# Add the src directory to the Python path so we can import the app
+sys.path.append(str(Path(__file__).parent.parent.resolve()))
 
 from flask_app import create_app  # noqa E402
 
@@ -25,16 +31,19 @@ def client(app):
     return app.test_client()
 
 
+@pytest.mark.order(1)
 def test_app_exists(app):
     """Test that the app exists."""
     assert app is not None
 
 
+@pytest.mark.order(2)
 def test_app_is_testing(app):
     """Test that the app is in testing mode."""
     assert app.config["TESTING"]
 
 
+@pytest.mark.order(3)
 def test_player_response(client):
     """Test the /api/players endpoint."""
     HTTP_OK = 200
@@ -70,7 +79,10 @@ def test_player_response(client):
 # They work
 
 
+@pytest.mark.order(4)
 def test_list_players_per_team_response(client, team_to_test="WAS"):
+    """Test the /api/teams/players/{team}/list endpoint."""
+    HTTP_OK = 200
     schema = {
         "type": "object",
         "properties": {
@@ -89,11 +101,12 @@ def test_list_players_per_team_response(client, team_to_test="WAS"):
         "required": [team_to_test],
     }
     response = client.get(f"/api/teams/players/{team_to_test}/list")
-    assert response.status_code == 200
+    assert response.status_code == HTTP_OK
     assert response.content_type == "application/json"
     validate(instance=response.get_json(), schema=schema)
 
 
+@pytest.mark.order(5)
 def test_colleges_schema_response(client):
     """Test the /api/colleges/{team}/list endpoint schema."""
     HTTP_OK = 200
@@ -116,7 +129,10 @@ def test_colleges_schema_response(client):
     validate(instance=json_data, schema=schema)
 
 
+@pytest.mark.order(6)
 def test_WAS_colleges_exact_response(client):
+    """Test the exact response for WAS colleges endpoint."""
+    HTTP_OK = 200
     expected_response = {
         "colleges": [
             "Texas A&M",
@@ -139,7 +155,7 @@ def test_WAS_colleges_exact_response(client):
     }
 
     response = client.get("/api/colleges/WAS/list")
-    assert response.status_code == 200
+    assert response.status_code == HTTP_OK
     assert response.content_type == "application/json"
 
     # Get the actual response data

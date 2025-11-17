@@ -28,7 +28,7 @@ If you are unsure or are looking for a refresher on what is expected, please tak
 
 ## Course Overview
 
-This course is designed to expose data science students to deeper computing concepts that are likely needed throughout their careers. We will do this in a project-based approach where students will work in small groups using common data science tools to build an entire pipeline from raw data to putting the data into a relational database to serving that data through an API. We will then layer on an MCP Server so that we can access our API using tools like ChatGPT, Claude and agentic frameworks.
+This course is designed to expose data science students to deeper computing concepts that are likely needed throughout their careers. We will do this in a project-based approach where students will work in small groups using common data science tools to build an entire pipeline from raw data to putting the data into a relational database to serving that data through an API. We will then convert the project to use Docker Compose for multi-container orchestration, and finally layer on an MCP (Model Context Protocol) Server so that we can access our API using AI assistants like Claude Desktop and Cursor.
 
 As a by-product of this effort, after taking this course, students should have experience managing their own computing environment and be able to build software with an understanding of best practices. 
 
@@ -161,10 +161,10 @@ Course Notes can be found linked inside each lesson plan.
 | 4: Flask & Code Quality | <ul><li>Advanced Requests</li><li>Organizing code</li><li>DRY</li><li>Separation of Concerns</li></ul> | <ul><li>[Project Part 2 Due](./project_assignments/part_2.md)</li><li>[Quiz 3A](./quiz/quiz3A.pdf)</li><li>[Answer Key](./quiz/quiz3AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_4.md)</li></ul> |
 | 5: SQLite & Management Commands | <ul><li>SQLite</li><li>Management Commands</li><li>CRUD</li><li>POST Requests</li></ul> | <ul><li>[Project Part 3 Due](./project_assignments/part_3.md)</li><li>[Quiz 4A](./quiz/quiz4A.pdf)/[Quiz 4B](./quiz/quiz4B.pdf)</li><li>[Answer Key](./quiz/quiz4AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_5.md)</li></ul> |
 | 6: Static Analysis, CRUD & Logging | <ul><li>Static Analysis</li><li>Ruff & Pre-commit</li><li>More CRUD</li><li>Logging</li></ul> | <ul><li>[Project Part 4 Due](./project_assignments/part_4.md)</li><li>[Quiz 5A](./quiz/quiz5A.pdf)</li><li>[Answer Key](./quiz/quiz5AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_6.md)</li></ul> |
-| 7: Adding Features | <ul><li>Logging in Python</li><li>Autodocs with MkDocs</li></ul> | <ul><li>[Project Part 5 Due](./project_assignments/part_5.md)</li><li>[Quiz 6A](./quiz/quiz6A.pdf)</li><li>[Answer Key](./quiz/quiz6AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_7.md)</li></ul> |
-| 8: MCP | <ul><li>MCP</li></ul> | <ul><li>[Project Part 6 Due](./project_assignments/part_6.md)</li><li>Quiz \#7</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_8.md)</li></ul> |
-| 9: MCP (cont.) and Testing | <ul><li>MCP</li><li>Testing</li></ul> | <ul><li>Project Part 7</li><li>Quiz \#8</li></ul>  | |
-| 10: Finals Week |  | <ul><li>Final Project Assignment</li><li>In person Final</li></ul>  | |
+| 7: Autodocs & Testing | <ul><li>Autodocs with MkDocs</li><li>Testing Part I</li><li>JSON Schema</li></ul> | <ul><li>[Project Part 5 Due](./project_assignments/part_5.md)</li><li>[Quiz 6A](./quiz/quiz6A.pdf)</li><li>[Answer Key](./quiz/quiz6AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_7.md)</li></ul> |
+| 8: Docker Compose & MCP Intro | <ul><li>Docker Compose</li><li>Multi-container orchestration</li><li>LLMs, Agents, MCP introduction</li></ul> | <ul><li>[Project Part 6 Due](./project_assignments/part_6.md)</li><li>Quiz \#7</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_8.md)</li></ul> |
+| 9: MCP Implementation | <ul><li>MCP Server implementation</li><li>Async programming</li><li>HTTP streaming (SSE)</li><li>MCP tools and resources</li></ul> | <ul><li>[Project Part 7 Due](./project_assignments/part_7.md)</li><li>No quiz</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_9.md)</li></ul> |
+| 10: Finals Week |  | <ul><li>[Final Project (Part 8) Due](./project_assignments/part_8.md)</li><li>In person Final</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/finals_week.md)</li></ul> |
 
 ## Canvas
 

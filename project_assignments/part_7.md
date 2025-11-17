@@ -18,11 +18,10 @@ To find the commit hash, you can either use the command line or check GitHub’s
 
 Note that any changes requested in the grading of the previous part need to be corrected.
 
-## Part VII: Logging and backtesting
+## Part VII: Backtesting and Docker Compose Migration
 
 - Your code must conform to all the requirements of all previous parts, including [Part VI](./part_6.md).
-
-
+- **Important**: This part requires converting your entire project to use Docker Compose instead of single-container Docker commands.
 
 ### Backtesting API
 
@@ -126,8 +125,25 @@ MSFT    15-Jan-2020  162.62   163.18  163.94   162.57
 
 ### Specifications:
 
-#### Updates to Make / Docker
-- There are no required updates to the Make and Docker components.
+#### Updates to Make / Docker Compose
+
+**All Docker commands must now use Docker Compose instead of single-container Docker.**
+
+- You must create a `docker-compose.yml` file in the root of your repository that defines at least one service for your Flask application.
+- All `make` commands must use `docker compose` instead of `docker run`.
+- Your `Makefile` should be updated to use Docker Compose commands:
+  - `make build` should use `docker compose build`
+  - `make flask` should use `docker compose up flask-app` (or your service name)
+  - `make interactive` should use `docker compose run --rm <service-name> /bin/bash`
+  - `make notebook` should use `docker compose run --rm -p 8888:8888 <service-name> ...`
+  - Database commands (`db_create`, `db_load`, etc.) should use `docker compose run --rm <service-name> ...`
+  - `make test` should use `docker compose run --rm <service-name> ...`
+  - `make autodocs` should use `docker compose run --rm -p 4040:4040 <service-name> ...`
+- Your project structure should be organized appropriately for Docker Compose (see `lecture_examples/16_compose` for reference).
+- All environment variables should be defined in the `docker-compose.yml` file's `environment` section.
+- Port mappings should be defined in the `docker-compose.yml` file.
+- Volume mounts should be defined in the `docker-compose.yml` file.
+- You may add additional services to your `docker-compose.yml` if needed (e.g., for documentation, testing, etc.), but at minimum you must have a service for your Flask application.
 
 #### Additional details
 
@@ -151,7 +167,8 @@ Please correct all of the feedback for Part VI. A portion of the grade will be s
 - All of the previous coding standards will be checked, and all of the previous APIs (`v1`, `v2`, and `v3`) will also be tested.
 - We will run `ruff`, using the `pyproject.toml` file here to make sure that your code conforms to the standards therein.
 - We will also verify that the `.pre-commit-config.yaml` is in the repo and able to be installed and used.
-- We will run the `make` commands outlined above and verify that they work according to the standards set out above.
+- We will run the `make` commands outlined above and verify that they work according to the standards set out above. All commands must use Docker Compose.
+- We will verify that your `docker-compose.yml` file is properly configured and that all services can be started and stopped correctly.
 - We will run an autograder on the endpoints to make sure that they return the correct data and information. This includes types and casing.
 - Your code will also be read over to make sure that it conforms to the standards laid out in class. If you want to receive full credit, make sure that your code has sound logic, is easy to read, maintains a good separation of concerns, and does not violate the DRY principle.
 - Finally, your code will also be read to make sure that all documentation is up to date and that the code has a consistent set of abstraction standards.

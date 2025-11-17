@@ -1,0 +1,35 @@
+site_name: Basketball API
+nav:
+  - Home: index.md
+  - About: about.md
+  - APIDocs: api_docs.md
+# theme: terminal
+
+docs_dir: docs
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - navigation.instant
+    - navigation.tracking
+    - toc.integrate
+  font:
+    text: Roboto
+    code: Roboto Mono
+  palette:
+    - scheme: default
+      primary: indigo
+
+plugins:
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [..]
+          options:
+            load_external_modules: true
+            show_type_annotations: false
+            show_root_heading: true
+            heading_level: 2
+            show_source: true
+            docstring_section_style: spacy

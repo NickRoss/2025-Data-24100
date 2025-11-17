@@ -1,5 +1,5 @@
 <!---
-title: "Pytest"
+title: "Testing Part II & Docker Compose"
 --->
 
 # Pytest
@@ -14,7 +14,7 @@ title: "Pytest"
 
 - We will need to add two packages to get our testing to work: `pytest` and `pytest-cov`.
 - The second of these handles the coverage calculations that we are interested in seeing.
-- As per usual, to get these I went into `interactive` mode and ran `pip install` followed by `pip freeze` to identify the package.
+- As per usual, to get these I went into `interactive` mode and ran `uv pip install` followed by `uv pip freeze` to identify the package.
 
 ```
 pytest==8.3.4
@@ -79,7 +79,7 @@ Depending on the volume of the tests this can be an effective strategy, however 
 - Currently the command [in our makefile](../lecture_examples/15_testing/Makefile) looks like this:
 
 ```
-pytest --cov=app /app/src/test/test.py --cov-report=term-missing -v
+uv run pytest --cov=app /app/src/test/test.py --cov-report=term-missing -v
 ```
 
 - Below you can find a description of each component and what it is used for.
@@ -292,3 +292,154 @@ def test_WAS_colleges_exact_response(client):
 - Importantly, the final `assert` uses a `sorted` function on the response. The `sorted` is required because the API does not guarantee the order of the colleges being returned. So the API could still be working and the lists not be equal in that the elements could be in different orders.
 
 - To avoid raising an error due to the order of the elements in the list, we sort both sides of the assert equality to make sure that they align.
+
+## Sequential Tests and pytest-order
+
+- When writing tests that depend on each other (such as the sequential v3 API tests), we need to ensure they run in a specific order.
+- By default, pytest does not guarantee execution order, so we use the `pytest-order` plugin.
+- Install it via `uv`: `uv add pytest-order`
+- Use the `@pytest.mark.order(n)` decorator on test functions to specify execution order:
+
+```python
+@pytest.mark.order(1)
+def test_12_create_account(client):
+    # Test code here
+    pass
+
+@pytest.mark.order(1)
+def test_13_add_stock(client):
+    # Test code here
+    pass
+```
+
+- Tests will run in numerical order (1, 2, etc.) regardless of their position in the file.
+- This is essential for sequential workflows where each test depends on the previous one.
+- When using `pytest-order`, tests with `@pytest.mark.order()` decorators run **first** in their specified order.
+- **Unmarked tests** (tests without the decorator) run **after** all marked tests, in their default order (typically alphabetical by function name).
+- If you want unmarked tests to run **before** marked tests, you can mark them with low order numbers (e.g., `@pytest.mark.order(1)`, `@pytest.mark.order(2)`, etc.).
+
+---
+
+# Docker Compose Introduction
+
+- Up until now, we've been using single-container Docker setups with `docker run` commands.
+- As our projects grow more complex, we often need multiple services working together (Flask API, databases, documentation servers, etc.).
+- Docker Compose allows us to define and manage multi-container Docker applications.
+
+## Motivation for Docker Compose
+
+- **Multiple Services**: Real applications often need multiple containers:
+  - Your Flask API
+  - A database (PostgreSQL, MySQL, etc.)
+  - A documentation server (Swagger UI, MkDocs)
+  - Background workers
+  - Cache servers (Redis)
+- **Orchestration**: Docker Compose manages the lifecycle of all these containers together.
+- **Networking**: Containers can easily communicate with each other on a shared network.
+- **Configuration**: All service definitions live in one `docker-compose.yml` file.
+
+## Structure of docker-compose.yml
+
+- A `docker-compose.yml` file defines services, networks, and volumes.
+- Here's a basic example:
+
+```yaml
+services:
+  flask-app:
+    build:
+      context: .
+      dockerfile: flask_app/Dockerfile
+    container_name: my_flask_app
+    ports:
+      - "4000:5000"
+    volumes:
+      - ./flask_app:/app
+    environment:
+      - DB_PATH=/app/data/app.db
+    networks:
+      - app-network
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: my_swagger_ui
+    ports:
+      - "8080:8080"
+    depends_on:
+      - flask-app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+```
+
+### Key Components
+
+- **services**: Each service is a container definition
+- **build**: How to build the image (context and dockerfile)
+- **ports**: Port mappings (host:container)
+- **volumes**: Directory mounts
+- **environment**: Environment variables
+- **networks**: Network configuration for inter-container communication
+- **depends_on**: Service dependencies (start order)
+
+## Basic Docker Compose Commands
+
+- `docker compose up` - Start all services (add `-d` for detached mode)
+- `docker compose down` - Stop and remove all containers
+- `docker compose ps` - List running containers
+- `docker compose logs` - View logs (add `-f` to follow)
+- `docker compose logs <service-name>` - View logs for a specific service
+- `docker compose run --rm <service-name> <command>` - Run a one-off command in a service
+- `docker compose build` - Build images for all services
+- `docker compose restart` - Restart all services
+- `docker kill <container-name>` - Forcefully stop a container (not a compose command, but useful for stopping individual containers)
+
+### Backgrounding and Detached Mode (-d)
+
+- By default, `docker compose up` runs in the foreground and attaches to the terminal, showing logs from all services.
+- Adding the `-d` flag runs containers in **detached mode** (background):
+  - Containers run in the background
+  - Your terminal is immediately freed up
+  - You can continue working while containers run
+  - Logs are not displayed in the terminal (use `docker compose logs` to view them)
+  
+- **When to use detached mode:**
+  - Running services that should stay up (like web servers, databases)
+  - When you want to use your terminal for other commands
+  - In production or long-running development sessions
+  
+- **When to use foreground mode (no `-d`):**
+  - Debugging startup issues (you see logs immediately)
+  - Short-lived tasks or one-time commands
+  - When you want to see real-time log output
+  
+- **Example:**
+  ```bash
+  # Foreground mode (logs visible, terminal blocked)
+  docker compose up
+  
+  # Detached mode (background, terminal free)
+  docker compose up -d
+  
+  # View logs after starting in detached mode
+  docker compose logs -f flask-app
+  ```
+
+## Container Networking
+
+- Containers in the same Docker Compose network can communicate using service names as hostnames.
+- For example, if you have a service named `flask-app`, other containers can reach it at `http://flask-app:5000`.
+- This is much easier than managing IP addresses manually.
+- The network is automatically created when you run `docker compose up`.
+
+## Migration from Single Container to Compose
+
+- Converting from single-container Docker to Docker Compose involves:
+  1. Creating a `docker-compose.yml` file
+  2. Moving environment variables from `docker run -e` flags to the `environment` section
+  3. Moving volume mounts from `-v` flags to the `volumes` section
+  4. Moving port mappings from `-p` flags to the `ports` section
+  5. Updating Makefile commands to use `docker compose` instead of `docker run`
+- See `lecture_examples/15_testing` (before) and `lecture_examples/16_compose` (after) for a complete example of this migration.

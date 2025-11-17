@@ -1,0 +1,7 @@
+repos:
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: "v0.7.1"  # Replace with latest version from https://github.com/astral-sh/ruff-pre-commit/releases
+  hooks:
+    - id: ruff
+    - id: ruff-format
+

@@ -5,6 +5,8 @@ requires-python = ">=3.10"
 dependencies = [
     "jupyter==1.1.0",
     "flask==3.0.3",
+    "flask-cors>=4.0.0",
+    "flask-openapi3[swagger,redoc,rapidoc,rapipdf,scalar,elements]>=4.0.0",
     "pandas==2.2.3",
     "pdoc==15.0.0",
     "mkdocs==1.6.1",

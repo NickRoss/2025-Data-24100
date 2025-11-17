@@ -78,7 +78,7 @@
 - What are unit tests, integration tests, and end-to-end tests? Be able to identify which type a given test is.
 - What is Test Driven Development (TDD)?
 - What is JSON Schema and why do we use it for validation?
-- Be able to read and write basic JSON Schema definitions for:
+- Be able to read basic JSON Schema definitions for:
   - Simple objects with properties
   - Arrays with typed items
   - Objects with required fields
