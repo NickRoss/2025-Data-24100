@@ -163,8 +163,8 @@ Course Notes can be found linked inside each lesson plan.
 | 6: Static Analysis, CRUD & Logging | <ul><li>Static Analysis</li><li>Ruff & Pre-commit</li><li>More CRUD</li><li>Logging</li></ul> | <ul><li>[Project Part 4 Due](./project_assignments/part_4.md)</li><li>[Quiz 5A](./quiz/quiz5A.pdf)</li><li>[Answer Key](./quiz/quiz5AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_6.md)</li></ul> |
 | 7: Autodocs & Testing | <ul><li>Autodocs with MkDocs</li><li>Testing Part I</li><li>JSON Schema</li></ul> | <ul><li>[Project Part 5 Due](./project_assignments/part_5.md)</li><li>[Quiz 6A](./quiz/quiz6A.pdf)</li><li>[Answer Key](./quiz/quiz6AK.md)</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_7.md)</li></ul> |
 | 8: Docker Compose & MCP Intro | <ul><li>Docker Compose</li><li>Multi-container orchestration</li><li>LLMs, Agents, MCP introduction</li></ul> | <ul><li>[Project Part 6 Due](./project_assignments/part_6.md)</li><li>Quiz \#7</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_8.md)</li></ul> |
-| 9: MCP Implementation | <ul><li>MCP Server implementation</li><li>Async programming</li><li>HTTP streaming (SSE)</li><li>MCP tools and resources</li></ul> | <ul><li>[Project Part 7 Due](./project_assignments/part_7.md)</li><li>No quiz</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_9.md)</li></ul> |
-| 10: Finals Week |  | <ul><li>[Final Project (Part 8) Due](./project_assignments/part_8.md)</li><li>In person Final</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/finals_week.md)</li></ul> |
+| 9: MCP Implementation | <ul><li>MCP Server implementation</li><li>Async programming</li><li>HTTP streaming (SSE)</li><li>MCP tools and resources</li></ul> | <ul><li>[Project Part 7 Due](./project_assignments/part_7.md)</li><li>Quiz \#8</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/week_9.md)</li></ul> |
+| 10: Finals Week |  | <ul><li>[Project Part 8 (Final Submission) Due](./project_assignments/part_8.md)</li><li>In person Final</li></ul>  | <ul><li>[Lesson Plan](./lesson_plan/finals_week.md)</li></ul> |
 
 ## Canvas
 

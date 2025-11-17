@@ -102,9 +102,9 @@ In addition to the tests above, please write tests for the `v3` API endpoints. T
 | 16 | GET `/api/v3/stocks/IBM` | Verify IBM stock shows holdings for the account from test 12. Schema Test. |
 | 17 | GET `/api/v3/stocks/AAPL` | Verify AAPL stock shows holdings for the account from test 12. Schema Test. |
 | 18 | GET `/api/v3/accounts/return/{account_id}` | Verify return calculation. Schema Test. |
-| 19 | DELETE `/api/v3/stocks` | Remove IBM holding (verify 204 response). |
-| 20 | DELETE `/api/v3/stocks` | Remove AAPL holding (verify 204 response). |
-| 21 | DELETE `/api/v3/accounts` | Delete account "Mr. Kitty" (verify 204 response). |
+| 19 | DELETE `/api/v3/stocks` | Remove IBM holding (verify 204 response). Schema Test. |
+| 20 | DELETE `/api/v3/stocks` | Remove AAPL holding (verify 204 response). Schema Test. |
+| 21 | DELETE `/api/v3/accounts` | Delete account "Mr. Kitty" (verify 204 response). Schema Test. |
 
 ### Specifications:
 

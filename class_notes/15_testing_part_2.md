@@ -5,20 +5,22 @@ title: "Testing Part II & Docker Compose"
 # Pytest
 
 - We will continue our discussion of testing by going into the details of how to implement testing inside our system. There are a number of things that we will need to do to get this complete, each will be highlighted below.
-  - `requirements.txt` update
   - file structure 
   - `makefile` update
   - `test/test.py` file
 
 ## Requirements.txt
 
-- We will need to add two packages to get our testing to work: `pytest` and `pytest-cov`.
-- The second of these handles the coverage calculations that we are interested in seeing.
-- As per usual, to get these I went into `interactive` mode and ran `uv pip install` followed by `uv pip freeze` to identify the package.
+- We will need to add three packages to get our testing to work: `pytest`, `pytest-cov`, and `pytest-order`.
+- `pytest` is the core testing framework.
+- `pytest-cov` handles the coverage calculations that we are interested in seeing.
+- `pytest-order` allows us to control the execution order of tests (needed for sequential tests).
+- As per usual, to get these I went into `interactive` mode and ran `uv add <package-name>` to add each package.
 
 ```
 pytest==8.3.4
 pytest-cov==6.0.0
+pytest-order==1.2.1
 ```
 
 ## File structure
@@ -185,9 +187,6 @@ def test_player_response(client):
   - We needed to do this because there is a directory `app` at the same level as `app.py` which makes it difficult to import structures from.
   - If we tried to import form `app` at this level python would not know which to import from -- the directory `app` or the file `app.py`
   - To avoid this we rename `app.py` to `flask_app.py`
-- First, notice the line beginning `sys.path...`.
-  - This lines adds the additional parent directories to the python path so that the current code is able to find them. 
-  - Without this file we will not be able to import the flask app.
 - Reading over the first few lines we can see that we end with importing the `create_app` function from the original `app.py` now renamed `flask_app.py`.
 
 ### Fixtures & Test Client
@@ -296,7 +295,7 @@ def test_WAS_colleges_exact_response(client):
 ## Sequential Tests and pytest-order
 
 - When writing tests that depend on each other (such as the sequential v3 API tests), we need to ensure they run in a specific order.
-- By default, pytest does not guarantee execution order, so we use the `pytest-order` plugin.
+- By default, pytest does not guarantee execution order, so we use the `pytest-order` plugin (the third testing package mentioned in Requirements.txt above).
 - Install it via `uv`: `uv add pytest-order`
 - Use the `@pytest.mark.order(n)` decorator on test functions to specify execution order:
 
@@ -341,7 +340,7 @@ def test_13_add_stock(client):
 ## Structure of docker-compose.yml
 
 - A `docker-compose.yml` file defines services, networks, and volumes.
-- Here's a basic example:
+- Here's the actual example from `lecture_examples/16_compose/docker-compose.yml`:
 
 ```yaml
 services:
@@ -349,40 +348,57 @@ services:
     build:
       context: .
       dockerfile: flask_app/Dockerfile
-    container_name: my_flask_app
+    container_name: bball_flask_app
     ports:
       - "4000:5000"
     volumes:
       - ./flask_app:/app
+      - ./pyproject.toml:/app/pyproject.toml
+      - ${RAW_DATA_DIR:-./flask_app/data/raw_data}:/app/src/data/raw_data
     environment:
-      - DB_PATH=/app/data/app.db
+      - DB_PATH=/app/data/bball.db
+      - DATA_DIR=/app/data
+      - DATA_241_API_KEY=${DATA_241_API_KEY}
+      - RAW_DATA_DIR=/app/src/data/raw_data
     networks:
-      - app-network
+      - bball-network
 
   swagger-ui:
     image: swaggerapi/swagger-ui:latest
-    container_name: my_swagger_ui
+    container_name: bball_swagger_ui
     ports:
       - "8080:8080"
+    environment:
+      - SWAGGER_JSON_URL=http://localhost:4000/docs/openapi.json
+      - SWAGGER_JSON=/docs/openapi.json
+      - URL=http://localhost:4000/docs/openapi.json
+      - VALIDATOR_URL=null
     depends_on:
       - flask-app
     networks:
-      - app-network
+      - bball-network
 
 networks:
-  app-network:
+  bball-network:
     driver: bridge
 ```
 
 ### Key Components
 
-- **services**: Each service is a container definition
-- **build**: How to build the image (context and dockerfile)
-- **ports**: Port mappings (host:container)
-- **volumes**: Directory mounts
-- **environment**: Environment variables
-- **networks**: Network configuration for inter-container communication
-- **depends_on**: Service dependencies (start order)
+- **services**: Each service is a container definition. In this example, we have two services: `flask-app` and `swagger-ui`.
+- **build**: How to build the image (context and dockerfile). The `flask-app` service builds from a Dockerfile, while `swagger-ui` uses a pre-built image.
+- **container_name**: Explicitly names the container (e.g., `bball_flask_app`, `bball_swagger_ui`).
+- **ports**: Port mappings (host:container). Flask app maps port 4000 on host to 5000 in container; Swagger UI maps 8080:8080.
+- **volumes**: Directory mounts. The `flask-app` service has multiple volumes:
+  - `./flask_app:/app` - Mounts the Flask app directory
+  - `./pyproject.toml:/app/pyproject.toml` - Mounts the pyproject.toml file
+  - Uses environment variable substitution `${RAW_DATA_DIR:-./flask_app/data/raw_data}` with a default value
+- **environment**: Environment variables. Can include:
+  - Static values (e.g., `DB_PATH=/app/data/bball.db`)
+  - Environment variable references from the host (e.g., `DATA_241_API_KEY=${DATA_241_API_KEY}`)
+- **networks**: Network configuration for inter-container communication. Both services are on `bball-network`.
+- **depends_on**: Service dependencies (start order). `swagger-ui` depends on `flask-app`, so Flask starts first.
+- **image**: For services that don't need building, you can use a pre-built image (like `swaggerapi/swagger-ui:latest`).
 
 ## Basic Docker Compose Commands
 
@@ -430,9 +446,42 @@ networks:
 ## Container Networking
 
 - Containers in the same Docker Compose network can communicate using service names as hostnames.
-- For example, if you have a service named `flask-app`, other containers can reach it at `http://flask-app:5000`.
+- In our example, both `flask-app` and `swagger-ui` are on the `bball-network`.
+- The `swagger-ui` service can reach the Flask API using the service name `flask-app` (though in this case, Swagger UI is configured to access it via `http://localhost:4000` from the host perspective).
+- If `swagger-ui` needed to access Flask from within the container network, it could use `http://flask-app:5000` (using the service name and the container's internal port).
 - This is much easier than managing IP addresses manually.
-- The network is automatically created when you run `docker compose up`.
+- The network (`bball-network`) is automatically created when you run `docker compose up`.
+
+### Network Architecture Diagram
+
+The following diagram illustrates how containers communicate in a Docker Compose network:
+
+```mermaid
+graph TB
+    subgraph Host["Host Machine"]
+        subgraph Network["bball-network (Docker Network)"]
+            Flask["flask-app Container<br/>Internal Port: 5000<br/>Container Name: bball_flask_app"]
+            Swagger["swagger-ui Container<br/>Internal Port: 8080<br/>Container Name: bball_swagger_ui"]
+        end
+        HostPort4000["Host Port 4000"]
+        HostPort8080["Host Port 8080"]
+    end
+    
+    HostPort4000 -->|"Port Mapping<br/>4000:5000"| Flask
+    HostPort8080 -->|"Port Mapping<br/>8080:8080"| Swagger
+    Swagger -.->|"Internal Network<br/>http://flask-app:5000"| Flask
+    Flask -.->|"Service Name Resolution<br/>(via Docker DNS)"| Swagger
+    
+    style Flask fill:#e1f5ff
+    style Swagger fill:#fff4e1
+    style Network fill:#f0f0f0
+```
+
+**Key Points:**
+- **Port Mappings**: Host ports (4000, 8080) map to container ports (5000, 8080)
+- **Internal Communication**: Containers can communicate using service names (`flask-app`, `swagger-ui`) instead of IP addresses
+- **Docker DNS**: Docker Compose automatically sets up DNS resolution so service names resolve to container IPs
+- **Network Isolation**: Containers on the same network can reach each other, but external access requires port mappings
 
 ## Migration from Single Container to Compose
 

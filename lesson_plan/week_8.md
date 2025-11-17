@@ -42,6 +42,7 @@
 - `docker compose logs` - View logs
 - `docker compose run` - Run a one-off command in a service
 - `docker compose build` - Build images
+- `docker kill <container-name>` - Forcefully stop a container (not a compose command, but useful for stopping individual containers)
 
 ### Container Networking
 
@@ -90,6 +91,7 @@
 - What is the difference between `docker compose up` and `docker compose run`?
 - How do you view logs from a specific service in Docker Compose?
 - What does `depends_on` do in a docker-compose.yml file?
+- What is the difference between `docker compose down` and `docker kill`?
 
 ### LLMs, Agents, and MCP
 
