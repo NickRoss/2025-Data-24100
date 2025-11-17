@@ -24,6 +24,7 @@ The goal of this assignment is to:
 1. Get your code up to the standards required by ruff, specifically the [pyproject.toml](./pyproject.toml)
 2. Implement a pre-commit hook, as per the [pre-commit-config.yaml](./pre-commit-config.yaml) (Note: The file should be named `.pre-commit-config.yaml` with a leading dot, but in this repo it is named `pre-commit-config.yaml` without the dot for easier access).
 3. Generate an account system for people to track their stock ownership over the time period
+4. Convert everything to use `log` rather than print statements.
 
 Specifically, we will create endpoints that:
 1. Add stocks to an account
@@ -63,8 +64,26 @@ CREATE TABLE stocks_owned (
 );
 ```
 
-#### Updates to Flask
+#### Logging
 
+- Update all logs to use a custom logger. As in the demonstration in class, the log format should be `log_format = "%(asctime)s | %(levelname)s | %(message)s"`.
+- The log specification is as follows:
+
+| System | Level | Description | 
+| --- | --- | --- | 
+| All `manage_db` commands | INFO | <ul><li>When a command starts (and which command)</li><li>When a command ends (and how long it took)</li></ul> | 
+| `manage_db` loading commands | DEBUG | <ul><li>As each year and market is loaded, log the time it took to load that year and market</li></ul> | 
+| `manage_db` table creation commands | DEBUG | <ul><li>Notification that the table was created (with its name)</li></ul> | 
+| All routes | DEBUG | <ul><li>Time it took to respond to the route</li><li>The body, header, and route</li><li>The response</li></ul> | 
+| All routes | INFO | <ul><li>All non-2xx responses (e.g., 500, 404)</li></ul>| 
+| All routes | WARN | <ul><li>Any time the incorrect (or no) API key is provided</li></ul> | 
+
+- All logs should contain specific and useful information regarding the process, written in a professional manner. 
+- No other `print` statements should exist. If there are additional things you want to report, please use an appropriate log command.
+- You do not need to override the Werkzeug library logging if you do not wish to. 
+
+#### Updates to Flask
+  
 - None of the previous endpoints should change from the specification. We will be adding a `v3` set of endpoints.
 
 - Given a base URL of `/api/v3/`, implement the following endpoints with the functionality below. Note that all requests need to go through the same authentication as `v1` and `v2` (e.g., using the `DATA-241-API-KEY` environment variable). If the key is invalid or not present in the header, the request should return a status code of 401.
