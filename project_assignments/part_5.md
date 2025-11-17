@@ -109,8 +109,10 @@ CREATE TABLE stocks_owned (
 - No request should take more than a few seconds (say 5). If it does, you should add an index to the table to make sure that the query is faster.
 - To calculate the return, take the `close` price for the stock on the day that it was sold and subtract the `open` price for the day that it was bought. Multiply this by the number of shares owned. Since an account can have multiple stock holdings, the above calculation should be repeated for all stocks owned by the specific account.
 
-$$ \mathrm{return} = \sum_{\mathrm{holdings}} \mathrm{num\_shares} \left( \mathrm{close}_{\mathrm{sales\_date}} - \mathrm{open}_{\mathrm{purchase\_date}} \right) $$
-
+$$
+\text{return} = \sum_{\text{holdings}} \text{num\_shares}
+\left( \text{close}_{\text{sales\_date}} - \text{open}_{\text{purchase\_date}} \right)
+$$
 - To determine a "valid" date when adding a stock to an account you should verify that both the `purchase_date` and `sale_date` symbol-date combinations exist in the data. If either combination does not exist, then return a 400. This is important since if either date does not exist then calculating the return would not be possible.
 
 - You should not be able to add stocks to an account that does not exist.
