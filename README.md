@@ -18,6 +18,14 @@ This course assumes that you are familiar with the basic concepts of Python prog
 
 If you are unsure or are looking for a refresher on what is expected, please take a look at this [prerequisite doc](./docs/prerequisites.md).
 
+## Things to update for next year
+<details>
+<summary>Click to see the full list</summary>
+- The data has Jan 1 and Dec 31st in it for every year, despite not being trading days. Have them removed.
+</details>
+
+
+
 ## Course Overview
 
 This course is designed to expose data science students to deeper computing concepts that are likely needed throughout their careers. We will do this in a project-based approach where students will work in small groups using common data science tools to build an entire pipeline from raw data to putting the data into a relational database to serving that data through an API. We will then layer on an MCP Server so that we can access our API using tools like ChatGPT, Claude and agentic frameworks.
