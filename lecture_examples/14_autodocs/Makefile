@@ -2,10 +2,8 @@ IMAGE_NAME=bball_app
 DB_PATH=/app/src/data/bball.db
 
 .PHONY=build notebook interactive run \
-	db_clean db_create db_load db_rm db_interactive
-
-# Common Docker run flags
-# DRY Principle
+	db_clean db_create db_load db_rm db_interactive \
+	autodoc
 
 COMMON_DOCKER_FLAGS= \
 	-v $(shell pwd):/app/src \
@@ -55,7 +53,6 @@ db_clean: build
 db_interactive: build
 	docker run -it $(COMMON_DOCKER_FLAGS) $(IMAGE_NAME) \
 	sqlite3 -column -header $(DB_PATH)
-
 
 autodoc: build
 	docker run -it -p 4040:4040 \
