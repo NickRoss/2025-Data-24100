@@ -71,8 +71,6 @@ Depending on the volume of the tests this can be an effective strategy, however 
     └── test.py
 ```
 
-- The one downside of this structure is that to be able to import things from the `app` directory we will need to modify our python path. Because the `test.py` file is down the file system path from `app` it will not naturally have access to things inside the `app` directory which is where the code lies. 
-- We will see hot address this issue within the `test/test.py` file below.
 
 ## Our Makefile command
 
@@ -114,9 +112,6 @@ from pathlib import Path
 
 import pytest
 from jsonschema import validate
-
-# Add the src directory to the Python path so we can import the app
-sys.path.append(str(Path(__file__).parent.parent.resolve()))
 
 from flask_app import create_app  # noqa E402
 

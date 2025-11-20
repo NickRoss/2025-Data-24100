@@ -1,0 +1,111 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage, fancyhdr, ifthen, amssymb, amsfonts, amsmath, booktabs}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage[margin=0.25in]{geometry}
+\usepackage{upquote}
+\usepackage{forest}
+\usepackage{ulem}
+\usepackage{colortbl}
+\usepackage{enumitem}
+\pagestyle{empty}
+
+\begin{document}
+
+\begin{table}[h]
+\centering
+\arrayrulecolor{black!10} % Very light table outline
+\begin{tabular}{|p{\textwidth}|}
+\hline
+\begin{minipage}[t]{\textwidth}
+\vspace{0pt}  % This is crucial for top alignment
+\noindent \textbf{Instructions:} Please answer the following questions, making sure to write legibly on the following pages. The code below is a subsection of a Python file that provides context for the questions below.
+\begin{itemize}
+\item Since we are writing Python code, please be careful about spacing/indentation. Leave enough room that it is obvious when you want things indented. 
+\item Make sure to write legibly.
+\item All questions are worth equal points unless otherwise stated.
+\item The quiz is cumulative and may include material from previous weeks.
+\end{itemize}
+\end{minipage} 
+\\
+\hline
+\end{tabular}
+\end{table}
+
+{\color{lightgray}\hrule}
+\begin{verbatim}
+from flask import Flask, request, jsonify
+from logger_utils import logger  # Assume this logger is already imported
+
+app = Flask(__name__)
+
+def calculate_discount(price, discount_percent):
+    # Calculate the final price after applying a discount.    
+
+    return price * (1 - discount_percent / 100)
+
+def apply_multiple_discounts(price, *discounts):
+    # Apply multiple discounts sequentially to a price.
+
+    result = price
+    for discount in discounts:
+        result = calculate_discount(result, discount)
+    return result
+
+@app.route('/api/products/<product_id>/price', methods=['GET'])
+def get_product_price(product_id):
+    discount = request.args.get('discount')
+    base_price = get_base_price(product_id)  # Assume this function exists
+    final_price = calculate_discount(base_price, discount)
+    return jsonify({
+        'product_id': product_id,
+        'base_price': base_price,
+        'discount_percent': discount,
+        'final_price': round(final_price, 2)
+    }), 200
+
+\end{verbatim}
+{\color{lightgray}\hrule}
+
+\clearpage
+
+\begin{tabularx}{\textwidth}{l|X}
+\textbf{Quiz 7A} &   \textbf{Name: } \\
+\hline
+\end{tabularx}
+
+
+\begin{enumerate}
+
+\item (3 Points) What does CRUD stand for in the context of API development? Please just write the words, no explanation needed.
+\vspace{1.5cm}
+
+
+\item Write a single test function called \texttt{test\_calculate\_discount} that tests the \texttt{calculate\_discount} function shown on the first page. Assume a logger named \texttt{logger} is already imported (as shown in the code context). It should take zero arguments and have no decorators. Your test should:
+\begin{itemize}
+    \item Test that a price of 100 with a 10\% discount returns 90.0
+    \item Test that a price of 50 with a 20\% discount returns 40.0
+    \item Log each successful test result at the INFO level using the format: \\ \texttt{"Test passed: \{price\}, \{discount\}, \{result\}"}
+\end{itemize}
+
+\vspace{5.5cm}
+	
+
+
+\item Write a single integration test function called \texttt{test\_discount\_edge\_cases} that tests \texttt{apply\_multiple\_discounts} (and so explicitly tests how  the functions work together.). Your test should:
+\begin{itemize}
+    \item Test that applying zero discounts (empty list) returns the original price
+    \item Test that applying a 0\% discount produces the same result as applying no discount
+    \item Test that applying a 100\% discount results in a final price of 0.0
+    \item Log each successful test result using the same format as in Question 2.
+\end{itemize}
+
+\vspace{6.5cm}
+
+\item (2 Points) In class we discussed autodocs systems like MkDocs. Please explain why the \texttt{site/} directory should {\it not} be included in a git repository. Write a single sentence answer.
+
+
+\end{enumerate}
+
+\end{document}
+

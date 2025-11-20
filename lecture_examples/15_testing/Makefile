@@ -63,4 +63,4 @@ test: build
 	docker run \
 	$(COMMON_DOCKER_FLAGS) \
 	$(IMAGE_NAME) \
-	uv run pytest --cov=app /app/src/test/test.py --cov-report=term-missing -v
+	uv run pytest --cov=app /app/src/test/test.py --cov-report=term-missing -v 

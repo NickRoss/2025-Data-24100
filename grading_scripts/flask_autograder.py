@@ -21,8 +21,8 @@ import requests
 from jsonschema import Draft7Validator
 
 # Suppress urllib3 header parsing warnings (they're noisy and we handle the responses fine)
-warnings.filterwarnings('ignore', message='.*Failed to parse headers.*')
-warnings.filterwarnings('ignore', module='urllib3')
+warnings.filterwarnings("ignore", message=".*Failed to parse headers.*")
+warnings.filterwarnings("ignore", module="urllib3")
 
 # Configure logging
 logging.basicConfig(
@@ -40,7 +40,7 @@ _header_issues_detected = False
 
 # Expected test counts for each API version (fixed, doesn't change based on failures)
 EXPECTED_TEST_COUNTS = {
-    "v1": 7,   # 3 endpoint tests + 4 auth tests
+    "v1": 7,  # 3 endpoint tests + 4 auth tests
     "v2": 18,  # 4 valid years + 4 invalid years + 5 price types + 1 invalid symbol + 4 auth
     "v3": 31,  # See detailed breakdown in run_v3_tests
 }
@@ -63,9 +63,7 @@ API_SCHEMAS = {
     "unique_nasdaq_stock_count": {
         "type": "object",
         "required": ["unique_nasdaq_stock_count"],
-        "properties": {
-            "unique_nasdaq_stock_count": {"type": "integer", "minimum": 0}
-        },
+        "properties": {"unique_nasdaq_stock_count": {"type": "integer", "minimum": 0}},
         "additionalProperties": False,
     },
     # Part 3 / v2 schemas
@@ -74,7 +72,7 @@ API_SCHEMAS = {
         "required": ["year", "count"],
         "properties": {
             "year": {"type": "integer", "minimum": 2010, "maximum": 2020},
-            "count": {"type": "integer", "minimum": 0}
+            "count": {"type": "integer", "minimum": 0},
         },
         "additionalProperties": False,
     },
@@ -89,15 +87,12 @@ API_SCHEMAS = {
                     "type": "object",
                     "required": ["date", "open"],
                     "properties": {
-                        "date": {
-                            "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
-                        },
-                        "open": {"type": "number"}
+                        "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                        "open": {"type": "number"},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
         "additionalProperties": False,
     },
@@ -112,15 +107,12 @@ API_SCHEMAS = {
                     "type": "object",
                     "required": ["date", "close"],
                     "properties": {
-                        "date": {
-                            "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
-                        },
-                        "close": {"type": "number"}
+                        "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                        "close": {"type": "number"},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
         "additionalProperties": False,
     },
@@ -135,15 +127,12 @@ API_SCHEMAS = {
                     "type": "object",
                     "required": ["date", "high"],
                     "properties": {
-                        "date": {
-                            "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
-                        },
-                        "high": {"type": "number"}
+                        "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                        "high": {"type": "number"},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
         "additionalProperties": False,
     },
@@ -158,15 +147,12 @@ API_SCHEMAS = {
                     "type": "object",
                     "required": ["date", "low"],
                     "properties": {
-                        "date": {
-                            "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
-                        },
-                        "low": {"type": "number"}
+                        "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                        "low": {"type": "number"},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
         "additionalProperties": False,
     },
@@ -181,15 +167,12 @@ API_SCHEMAS = {
                     "type": "object",
                     "required": ["date", "high_low"],
                     "properties": {
-                        "date": {
-                            "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
-                        },
-                        "high_low": {"type": "number"}
+                        "date": {"type": "string", "pattern": r"^\d{4}-\d{2}-\d{2}$"},
+                        "high_low": {"type": "number"},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
         "additionalProperties": False,
     },
@@ -201,26 +184,22 @@ API_SCHEMAS = {
             "required": ["account_id", "name"],
             "properties": {
                 "account_id": {"type": "integer"},
-                "name": {"type": "string", "minLength": 1}
+                "name": {"type": "string", "minLength": 1},
             },
-            "additionalProperties": False
-        }
+            "additionalProperties": False,
+        },
     },
     "v3_account_created": {
         "type": "object",
         "required": ["account_id"],
-        "properties": {
-            "account_id": {"type": "integer", "minimum": 1}
-        },
-        "additionalProperties": False
+        "properties": {"account_id": {"type": "integer", "minimum": 1}},
+        "additionalProperties": False,
     },
     "v3_account_deleted": {
         "type": "object",
         "required": ["account_id"],
-        "properties": {
-            "account_id": {"type": "integer"}
-        },
-        "additionalProperties": False
+        "properties": {"account_id": {"type": "integer"}},
+        "additionalProperties": False,
     },
     "v3_account_details": {
         "type": "object",
@@ -232,24 +211,29 @@ API_SCHEMAS = {
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "required": ["symbol", "purchase_date", "sale_date", "number_of_shares"],
+                    "required": [
+                        "symbol",
+                        "purchase_date",
+                        "sale_date",
+                        "number_of_shares",
+                    ],
                     "properties": {
                         "symbol": {"type": "string", "minLength": 1},
                         "purchase_date": {
                             "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
+                            "pattern": r"^\d{4}-\d{2}-\d{2}$",
                         },
                         "sale_date": {
                             "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
+                            "pattern": r"^\d{4}-\d{2}-\d{2}$",
                         },
-                        "number_of_shares": {"type": "integer", "minimum": 1}
+                        "number_of_shares": {"type": "integer", "minimum": 1},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
-        "additionalProperties": False
+        "additionalProperties": False,
     },
     "v3_stock_holdings": {
         "type": "object",
@@ -260,33 +244,35 @@ API_SCHEMAS = {
                 "type": "array",
                 "items": {
                     "type": "object",
-                    "required": ["account_id", "purchase_date", "sale_date", "number_of_shares"],
+                    "required": [
+                        "account_id",
+                        "purchase_date",
+                        "sale_date",
+                        "number_of_shares",
+                    ],
                     "properties": {
                         "account_id": {"type": "integer"},
                         "purchase_date": {
                             "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
+                            "pattern": r"^\d{4}-\d{2}-\d{2}$",
                         },
                         "sale_date": {
                             "type": "string",
-                            "pattern": r"^\d{4}-\d{2}-\d{2}$"
+                            "pattern": r"^\d{4}-\d{2}-\d{2}$",
                         },
-                        "number_of_shares": {"type": "integer", "minimum": 1}
+                        "number_of_shares": {"type": "integer", "minimum": 1},
                     },
-                    "additionalProperties": False
-                }
-            }
+                    "additionalProperties": False,
+                },
+            },
         },
-        "additionalProperties": False
+        "additionalProperties": False,
     },
     "v3_account_return": {
         "type": "object",
         "required": ["account_id", "return"],
-        "properties": {
-            "account_id": {"type": "integer"},
-            "return": {"type": "number"}
-        },
-        "additionalProperties": False
+        "properties": {"account_id": {"type": "integer"}, "return": {"type": "number"}},
+        "additionalProperties": False,
     },
 }
 
@@ -323,7 +309,9 @@ class FlaskAPITester:
             "v2": {"passed": 0, "failed": 0, "total": 0},
             "v3": {"passed": 0, "failed": 0, "total": 0},
         }
-        self.current_api_version = None  # Track which API version is currently being tested
+        self.current_api_version = (
+            None  # Track which API version is currently being tested
+        )
         self.endpoint_data = {}  # Store actual data returned from endpoints
         self.return_calculations = {}  # Store return calculations for reporting
 
@@ -347,12 +335,13 @@ class FlaskAPITester:
 
             # Get purchase price (open on purchase date)
             purchase_data, purchase_status, _ = self.make_request(
-                f"/api/v2/open/{symbol}",
-                use_api_key=True
+                f"/api/v2/open/{symbol}", use_api_key=True
             )
 
             if purchase_status != 200 or not purchase_data:
-                logger.debug(f"Failed to get purchase price for {symbol} on {purchase_date}")
+                logger.debug(
+                    f"Failed to get purchase price for {symbol} on {purchase_date}"
+                )
                 return None
 
             # Find the purchase date price
@@ -368,8 +357,7 @@ class FlaskAPITester:
 
             # Get sale price (close on sale date)
             sale_data, sale_status, _ = self.make_request(
-                f"/api/v2/close/{symbol}",
-                use_api_key=True
+                f"/api/v2/close/{symbol}", use_api_key=True
             )
 
             if sale_status != 200 or not sale_data:
@@ -439,9 +427,13 @@ class FlaskAPITester:
             if method == "GET":
                 response = requests.get(url, headers=headers, timeout=10)
             elif method == "POST":
-                response = requests.post(url, headers=headers, json=json_data, timeout=10)
+                response = requests.post(
+                    url, headers=headers, json=json_data, timeout=10
+                )
             elif method == "DELETE":
-                response = requests.delete(url, headers=headers, json=json_data, timeout=10)
+                response = requests.delete(
+                    url, headers=headers, json=json_data, timeout=10
+                )
             else:
                 logger.error(f"Unsupported HTTP method: {method}")
                 return None, 500, 0.0
@@ -449,9 +441,15 @@ class FlaskAPITester:
 
             # Check for malformed headers (silently track for summary)
             global _header_issues_detected
-            if not _header_issues_detected and hasattr(response, 'raw') and hasattr(response.raw, '_original_response'):
+            if (
+                not _header_issues_detected
+                and hasattr(response, "raw")
+                and hasattr(response.raw, "_original_response")
+            ):
                 raw_response = response.raw._original_response
-                if hasattr(raw_response, 'msg') and hasattr(raw_response.msg, 'defects'):
+                if hasattr(raw_response, "msg") and hasattr(
+                    raw_response.msg, "defects"
+                ):
                     if raw_response.msg.defects:
                         _header_issues_detected = True
 
@@ -482,9 +480,7 @@ class FlaskAPITester:
             logger.error(f"Request failed: {e}")
             return None, 500, 0.0
 
-    def validate_response(
-        self, data: dict, schema: dict
-    ) -> tuple[bool, list[str]]:
+    def validate_response(self, data: dict, schema: dict) -> tuple[bool, list[str]]:
         """
         Validate response data against a JSON schema.
 
@@ -596,7 +592,9 @@ class FlaskAPITester:
         # Validate response schema
         if data is None:
             if not self.json_output:
-                logger.error(f"✗ FAILED: {display_name} - No response data received ({elapsed_time:.0f}ms)")
+                logger.error(
+                    f"✗ FAILED: {display_name} - No response data received ({elapsed_time:.0f}ms)"
+                )
             self.test_results["failed"] += 1
             if self.current_api_version:
                 self.results_by_version[self.current_api_version]["failed"] += 1
@@ -606,7 +604,9 @@ class FlaskAPITester:
 
         if not is_valid:
             if not self.json_output:
-                logger.error(f"✗ FAILED: {display_name} - Schema validation errors ({elapsed_time:.0f}ms):")
+                logger.error(
+                    f"✗ FAILED: {display_name} - Schema validation errors ({elapsed_time:.0f}ms):"
+                )
                 for error in errors:
                     logger.error(f"  - {error}")
             self.test_results["failed"] += 1
@@ -762,15 +762,20 @@ class FlaskAPITester:
             logger.info("=" * 70)
 
         all_passed = True
-        
+
         # Valid years to test (2010-2020)
         valid_years = [2010, 2015, 2019, 2020]  # Start, middle, recent, end
         # Invalid years to test
-        invalid_years = [2009, 2021, 1980, 2025]  # Before range, after range, far before, far after
-        
+        invalid_years = [
+            2009,
+            2021,
+            1980,
+            2025,
+        ]  # Before range, after range, far before, far after
+
         # Test symbols - try common ones that should exist in the data
         test_symbols = ["AAPL", "IBM", "MSFT"]  # Common stocks likely in data
-        
+
         # Test 1-4: /api/v2/{YEAR} with multiple valid years
         if not self.json_output:
             logger.info("\n--- Testing /api/v2/{YEAR} with valid years ---")
@@ -782,7 +787,7 @@ class FlaskAPITester:
                 endpoint_key=f"v2_year_{year}",
             )
             all_passed = all_passed and success
-            
+
             # Verify year matches what was requested
             if success and data and data.get("year") != year:
                 if not self.json_output:
@@ -791,7 +796,7 @@ class FlaskAPITester:
                         f"expected {year}, got {data.get('year')}"
                     )
                 all_passed = False
-        
+
         # Test 5-8: /api/v2/{YEAR} with multiple invalid years (should return 404)
         if not self.json_output:
             logger.info("\n--- Testing /api/v2/{YEAR} with invalid years ---")
@@ -802,7 +807,7 @@ class FlaskAPITester:
                 test_name=f"Year count for invalid year {year} (should return 404)",
             )
             all_passed = all_passed and success
-        
+
         # Test 9-13: Price endpoints for valid symbols
         price_endpoints = [
             ("open", "v2_open_price_info", "Open prices"),
@@ -811,24 +816,24 @@ class FlaskAPITester:
             ("low", "v2_low_price_info", "Low prices"),
             ("high_low", "v2_high_low_price_info", "High-Low difference"),
         ]
-        
+
         if not self.json_output:
             logger.info("\n--- Testing /api/v2/{TYPE}/{SYMBOL} endpoints ---")
-        
+
         for price_type, schema_key, description in price_endpoints:
             # Try each test symbol until one works
             symbol_tested = None
             for symbol in test_symbols:
                 if not self.json_output:
                     logger.info(f"  Testing /api/v2/{price_type}/{symbol}...")
-                
+
                 success, data = self.test_endpoint(
                     f"/api/v2/{price_type}/{symbol}",
                     schema=API_SCHEMAS[schema_key],
                     test_name=f"{description} for {symbol} with valid API key",
                     endpoint_key=f"v2_{price_type}_{symbol}",
                 )
-                
+
                 if success:
                     symbol_tested = symbol
                     # Verify symbol matches and price_info is non-empty
@@ -840,13 +845,16 @@ class FlaskAPITester:
                                     f"expected {symbol}, got {data.get('symbol')}"
                                 )
                             all_passed = False
-                        elif not data.get("price_info") or len(data.get("price_info", [])) == 0:
+                        elif (
+                            not data.get("price_info")
+                            or len(data.get("price_info", [])) == 0
+                        ):
                             if not self.json_output:
                                 logger.warning(
                                     f"⚠ WARNING: Empty price_info for /api/v2/{price_type}/{symbol}"
                                 )
                     break  # Found a working symbol, move to next endpoint type
-            
+
             if symbol_tested:
                 all_passed = all_passed and True
             else:
@@ -857,7 +865,7 @@ class FlaskAPITester:
                         f"worked for /api/v2/{price_type}/ endpoint"
                     )
                 all_passed = False
-        
+
         # Test 14: Invalid symbol (should return 404)
         if not self.json_output:
             logger.info("\n--- Testing /api/v2/open/{SYMBOL} with invalid symbol ---")
@@ -867,7 +875,7 @@ class FlaskAPITester:
             test_name="Open prices for invalid symbol (should return 404)",
         )
         all_passed = all_passed and success
-        
+
         # Test 15: Authentication - missing API key on /api/v2/{YEAR}
         if not self.json_output:
             logger.info("\n--- Testing v2 authentication (missing API key) ---")
@@ -878,7 +886,7 @@ class FlaskAPITester:
             test_name="Year count without API key (should return 401)",
         )
         all_passed = all_passed and success
-        
+
         # Test 16: Authentication - invalid API key on /api/v2/{YEAR}
         success, _ = self.test_endpoint(
             f"/api/v2/{valid_years[0]}",
@@ -887,7 +895,7 @@ class FlaskAPITester:
             test_name="Year count with invalid API key (should return 401)",
         )
         all_passed = all_passed and success
-        
+
         # Test 17: Authentication - missing API key on price endpoint
         # Use the first symbol that worked, or just use the first test symbol
         test_symbol = test_symbols[0]
@@ -898,7 +906,7 @@ class FlaskAPITester:
             test_name="Open prices without API key (should return 401)",
         )
         all_passed = all_passed and success
-        
+
         # Test 18: Authentication - invalid API key on price endpoint
         success, _ = self.test_endpoint(
             f"/api/v2/open/{test_symbol}",
@@ -993,7 +1001,11 @@ class FlaskAPITester:
 
         # Verify the accounts we created are in the list
         if success and accounts_list and created_account_ids:
-            found_accounts = sum(1 for acc in accounts_list if acc.get("account_id") in created_account_ids)
+            found_accounts = sum(
+                1
+                for acc in accounts_list
+                if acc.get("account_id") in created_account_ids
+            )
             if found_accounts != len(created_account_ids):
                 if not self.json_output:
                     logger.error(
@@ -1007,7 +1019,9 @@ class FlaskAPITester:
             logger.info("\n--- Testing GET /api/v3/accounts/<id> (account details) ---")
 
         if created_account_ids:
-            for i, account_id in enumerate(created_account_ids[:2]):  # Test first 2 accounts
+            for i, account_id in enumerate(
+                created_account_ids[:2]
+            ):  # Test first 2 accounts
                 success, account_details = self.test_endpoint(
                     f"/api/v3/accounts/{account_id}",
                     schema=API_SCHEMAS["v3_account_details"],
@@ -1036,16 +1050,35 @@ class FlaskAPITester:
 
         # Test 11-14: POST /api/v3/stocks - add stocks to accounts
         if not self.json_output:
-            logger.info("\n--- Testing POST /api/v3/stocks (add stocks to accounts) ---")
+            logger.info(
+                "\n--- Testing POST /api/v3/stocks (add stocks to accounts) ---"
+            )
 
         # Use common stocks that should exist and valid trading dates
         test_stocks = [
-            {"account_id": created_account_ids[0] if created_account_ids else 1,
-             "symbol": "AAPL", "purchase_date": "2015-01-05", "sale_date": "2015-12-31", "number_of_shares": 100},
-            {"account_id": created_account_ids[0] if created_account_ids else 1,
-             "symbol": "MSFT", "purchase_date": "2016-06-01", "sale_date": "2016-12-30", "number_of_shares": 50},
-            {"account_id": created_account_ids[1] if len(created_account_ids) > 1 else 1,
-             "symbol": "IBM", "purchase_date": "2017-03-15", "sale_date": "2017-09-29", "number_of_shares": 75},
+            {
+                "account_id": created_account_ids[0] if created_account_ids else 1,
+                "symbol": "AAPL",
+                "purchase_date": "2015-01-05",
+                "sale_date": "2015-12-31",
+                "number_of_shares": 100,
+            },
+            {
+                "account_id": created_account_ids[0] if created_account_ids else 1,
+                "symbol": "MSFT",
+                "purchase_date": "2016-06-01",
+                "sale_date": "2016-12-30",
+                "number_of_shares": 50,
+            },
+            {
+                "account_id": created_account_ids[1]
+                if len(created_account_ids) > 1
+                else 1,
+                "symbol": "IBM",
+                "purchase_date": "2017-03-15",
+                "sale_date": "2017-09-29",
+                "number_of_shares": 75,
+            },
         ]
 
         for stock in test_stocks:
@@ -1069,7 +1102,7 @@ class FlaskAPITester:
                 "symbol": "AAPL",
                 "purchase_date": "2015-12-19",  # Not a trading day (Saturday)
                 "sale_date": "2015-12-31",
-                "number_of_shares": 10
+                "number_of_shares": 10,
             },
             expected_status_codes=[400],
             test_name="Add stock with invalid purchase date (should return 400)",
@@ -1078,7 +1111,9 @@ class FlaskAPITester:
 
         # Test 16: GET /api/v3/accounts/<id> - verify stocks were added
         if not self.json_output:
-            logger.info("\n--- Testing GET /api/v3/accounts/<id> (verify stocks added) ---")
+            logger.info(
+                "\n--- Testing GET /api/v3/accounts/<id> (verify stocks added) ---"
+            )
 
         if created_account_ids:
             success, account_with_stocks = self.test_endpoint(
@@ -1102,7 +1137,9 @@ class FlaskAPITester:
 
         # Test 17-18: GET /api/v3/stocks/<symbol> - get stock holdings across accounts
         if not self.json_output:
-            logger.info("\n--- Testing GET /api/v3/stocks/<symbol> (stock holdings) ---")
+            logger.info(
+                "\n--- Testing GET /api/v3/stocks/<symbol> (stock holdings) ---"
+            )
 
         for symbol in ["AAPL", "MSFT"]:
             success, stock_holdings = self.test_endpoint(
@@ -1133,14 +1170,20 @@ class FlaskAPITester:
         if success and empty_holdings:
             if len(empty_holdings.get("holdings", [])) != 0:
                 if not self.json_output:
-                    logger.warning("⚠ WARNING: Expected empty holdings list for non-existent stock symbol")
+                    logger.warning(
+                        "⚠ WARNING: Expected empty holdings list for non-existent stock symbol"
+                    )
 
         # Test 20-21: GET /api/v3/accounts/return/<id> - calculate return
         if not self.json_output:
-            logger.info("\n--- Testing GET /api/v3/accounts/return/<id> (calculate return) ---")
+            logger.info(
+                "\n--- Testing GET /api/v3/accounts/return/<id> (calculate return) ---"
+            )
 
         if created_account_ids:
-            for idx, account_id in enumerate(created_account_ids[:2]):  # Test first 2 accounts
+            for idx, account_id in enumerate(
+                created_account_ids[:2]
+            ):  # Test first 2 accounts
                 success, return_data = self.test_endpoint(
                     f"/api/v3/accounts/return/{account_id}",
                     schema=API_SCHEMAS["v3_account_return"],
@@ -1166,19 +1209,29 @@ class FlaskAPITester:
                     account_holdings = []
                     if idx == 0:
                         # First account has AAPL and MSFT
-                        account_holdings = [stock for stock in test_stocks if stock["account_id"] == account_id]
+                        account_holdings = [
+                            stock
+                            for stock in test_stocks
+                            if stock["account_id"] == account_id
+                        ]
                     elif idx == 1 and len(created_account_ids) > 1:
                         # Second account has IBM
-                        account_holdings = [stock for stock in test_stocks if stock["account_id"] == account_id]
+                        account_holdings = [
+                            stock
+                            for stock in test_stocks
+                            if stock["account_id"] == account_id
+                        ]
 
                     if account_holdings:
-                        expected_return = self.calculate_expected_return(account_holdings)
+                        expected_return = self.calculate_expected_return(
+                            account_holdings
+                        )
 
                         # Store for reporting
                         self.return_calculations[account_id] = {
                             "reported": reported_return,
                             "expected": expected_return,
-                            "holdings": account_holdings
+                            "holdings": account_holdings,
                         }
 
                         if expected_return is not None:
@@ -1205,7 +1258,9 @@ class FlaskAPITester:
 
         # Test 22: GET /api/v3/accounts/return/<invalid_id> - should return 404
         if not self.json_output:
-            logger.info("\n--- Testing GET /api/v3/accounts/return/<id> with invalid ID ---")
+            logger.info(
+                "\n--- Testing GET /api/v3/accounts/return/<id> with invalid ID ---"
+            )
         success, _ = self.test_endpoint(
             "/api/v3/accounts/return/999999",
             expected_status_codes=[404],
@@ -1238,7 +1293,7 @@ class FlaskAPITester:
                 "symbol": "AAPL",
                 "purchase_date": "2015-01-05",
                 "sale_date": "2099-12-31",  # Wrong date
-                "number_of_shares": 100
+                "number_of_shares": 100,
             },
             expected_status_codes=[404],
             test_name="Remove stock with non-matching data (should return 404)",
@@ -1283,7 +1338,11 @@ class FlaskAPITester:
 
         # Verify deleted accounts are not in the list
         if success and final_accounts and created_account_ids:
-            found_deleted = sum(1 for acc in final_accounts if acc.get("account_id") in created_account_ids)
+            found_deleted = sum(
+                1
+                for acc in final_accounts
+                if acc.get("account_id") in created_account_ids
+            )
             if found_deleted > 0:
                 if not self.json_output:
                     logger.error(
@@ -1378,6 +1437,7 @@ class FlaskAPITester:
         if self.json_output:
             # Output JSON format for parsing by other scripts
             import json
+
             result = {
                 "total_tests": expected_total,  # Use expected total for consistency
                 "tests_run": total,  # How many actually ran
@@ -1447,8 +1507,12 @@ class FlaskAPITester:
         # Report header issues if detected
         if _header_issues_detected:
             logger.info("\n⚠ CODE QUALITY ISSUE:")
-            logger.info("  HTTP response headers are malformed (likely 'Content Type' instead of 'Content-Type')")
-            logger.info("  This violates HTTP standards but responses were processed successfully")
+            logger.info(
+                "  HTTP response headers are malformed (likely 'Content Type' instead of 'Content-Type')"
+            )
+            logger.info(
+                "  This violates HTTP standards but responses were processed successfully"
+            )
 
         if failed == 0 and total == expected_total:
             logger.info("\n✓ ALL TESTS PASSED!")
@@ -1519,7 +1583,7 @@ Examples:
     if args.debug:
         logger.setLevel(logging.DEBUG)
         logging.getLogger().setLevel(logging.DEBUG)
-    
+
     # If JSON output is requested, suppress all logging
     if args.json:
         logging.getLogger().setLevel(logging.CRITICAL)

@@ -35,10 +35,24 @@ def test_app_is_testing(app):
     assert app.config["TESTING"]
 
 
+@pytest.mark.order(1)
+def test_list_route(client):
+    """Test the /api/list endpoint."""
+    response = client.get("/api/colleges/list")
+    assert response.status_code == 200
+    assert response.content_type == "application/json"
+
+
+@pytest.mark.order(2)
+def test_list_route_v2(client):
+    """Test the /api/list endpoint."""
+    response = client.get("/api/colleges/list")
+    assert response.status_code != 400
+
+
 def test_player_response(client):
     """Test the /api/players endpoint."""
     HTTP_OK = 200
-
     schema = {
         "type": "object",
         "properties": {
