@@ -76,7 +76,7 @@ CREATE TABLE stocks_owned (
 | `manage_db` table creation commands | DEBUG | <ul><li>Notification that the table was created (with its name)</li></ul> | 
 | All routes | DEBUG | <ul><li>Time it took to respond to the route</li><li>The body, header, and route</li><li>The response</li></ul> | 
 | All routes | INFO | <ul><li>All non-2xx responses (e.g., 500, 404)</li></ul>| 
-| All routes | WARN | <ul><li>Any time the incorrect (or no) API key is provided</li></ul> | 
+| All routes | WARNING | <ul><li>Any time the incorrect (or no) API key is provided</li></ul> | 
 
 - All logs should contain specific and useful information regarding the process, written in a professional manner. 
 - No other `print` statements should exist. If there are additional things you want to report, please use an appropriate log command.

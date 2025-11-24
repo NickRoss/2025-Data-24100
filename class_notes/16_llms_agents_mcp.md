@@ -68,7 +68,7 @@ Here are some popular models you should know about:
 2. **Claude 3.5 Sonnet** (Anthropic)
    - Strong reasoning and coding capabilities
    - Available via Anthropic API
-   - [Anthropic Models](https://www.anthropic.com/models)
+   - [Anthropic](https://www.anthropic.com)
 
 3. **Gemini Pro** (Google)
    - Google's flagship model
