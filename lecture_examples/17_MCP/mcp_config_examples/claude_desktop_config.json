@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "basketball-api": {
+      "command": "docker",
+      "args": [
+        "compose",
+        "-f",
+        "/ABSOLUTE/PATH/TO/17_MCP/docker-compose.yml",
+        "run",
+        "--rm",
+        "mcp-server"
+      ],
+      "description": "Basketball API MCP Server - Query basketball player data (requires 'make flask' running first)"
+    }
+  }
+}
+

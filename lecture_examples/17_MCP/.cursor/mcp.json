@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "basketball-api": {
+      "url": "http://localhost:3000/sse",
+      "description": "Basketball API MCP Server (HTTP/SSE) - Query basketball player data"
+    }
+  }
+}

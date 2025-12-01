@@ -1,0 +1,51 @@
+services:
+  flask-app:
+    build:
+      context: ./flask_app
+      dockerfile: Dockerfile
+    container_name: bball_flask_app
+    ports:
+      - "4000:5000"
+    volumes:
+      - ./flask_app:/app
+      - ${RAW_DATA_DIR}:/app/src/data/raw_data
+    environment:
+      - DB_PATH=/app/data/bball.db
+      - DATA_DIR=/app/data
+      - DATA_241_API_KEY=${DATA_241_API_KEY}
+    networks:
+      - bball-network
+
+  mcp-server:
+    build:
+      context: ./mcp_server
+      dockerfile: Dockerfile
+    container_name: bball_mcp_server
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./mcp_server:/app
+    environment:
+      - FLASK_API_URL=http://flask-app:5000
+    command: ["uv", "run", "server.py"]
+    depends_on:
+      - flask-app
+    networks:
+      - bball-network
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: bball_swagger_ui
+    ports:
+      - "8081:8080"
+    environment:
+      - SWAGGER_JSON_URL=http://localhost:4000/docs/openapi.json
+    depends_on:
+      - flask-app
+    networks:
+      - bball-network
+
+networks:
+  bball-network:
+    driver: bridge
+

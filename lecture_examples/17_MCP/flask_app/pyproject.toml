@@ -1,0 +1,59 @@
+[project]
+name = "testing"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "jupyter==1.1.0",
+    "flask==3.0.3",
+    "flask-cors>=4.0.0",
+    "flask-openapi3[swagger,redoc,rapidoc,rapipdf,scalar,elements]>=4.0.0",
+    "pandas==2.2.3",
+    "pdoc==15.0.0",
+    "mkdocs==1.6.1",
+    "mkdocs-get-deps==0.2.0",
+    "mkdocs-autorefs==1.2.0",
+    "mkdocs-material==9.5.45",
+    "mkdocs-material-extensions==1.3.1",
+    "mkdocs-terminal==4.6.0",
+    "mkdocstrings==0.27.0",
+    "mkdocstrings-python==1.12.2",
+    "pytest==8.3.4",
+    "pytest-cov==6.0.0",
+    "pytest-order==1.3.0",
+]
+
+[tool.ruff]
+line-length = 79
+
+[tool.ruff.lint]
+extend-select = [
+  # by default, ruff enables all F and a subset of E rules
+  # for a description of rulesets and examples, see:
+  # https://docs.astral.sh/ruff/rules/
+  "B",      # bugbear - identifies likely bugs
+  "C4",     # flake8-comprehensions - identifies redundant calls in comprehensions
+  "D",      # pydocstyle - requires docstrings on all public modules/functions/classes
+  "I",      # isort
+  "E501",   # line length
+  "N801",   # pep8-naming - enforce ClassNamesStyle
+  "N804",   # pep8-naming - first arg of classmethod should be cls
+  "N805",   # pep8-naming - first arg of method should be self
+  "PD",     # pandas-vet
+  "PLR2004",# Pylint no magic values!
+  "PTH",    # prefer pathlib over os.path as seems to be the consensus
+  "Q",      # flake8-quotes - double quotes preferred (like black)
+  "UP",     # pyupgrade - requires preferred syntax in newer python versions
+  "YTT",    # flake8-2020 - corrects code that doesn't anticipate 2 digit python minor version  
+]
+
+ignore = [
+  "D415",   # allow first line of doctstrings to end without punctuation
+  "B905"    # won't work on python <3.10
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["D104"]
+
