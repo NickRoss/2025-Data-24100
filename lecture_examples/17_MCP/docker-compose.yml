@@ -8,11 +8,9 @@ services:
       - "4000:5000"
     volumes:
       - ./flask_app:/app
-      - ${RAW_DATA_DIR}:/app/src/data/raw_data
     environment:
       - DB_PATH=/app/data/bball.db
       - DATA_DIR=/app/data
-      - DATA_241_API_KEY=${DATA_241_API_KEY}
     networks:
       - bball-network
 

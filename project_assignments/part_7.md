@@ -126,13 +126,15 @@ The other piece of the response is the `num_observations`. This should count the
 #### Backtesting Specifications:
 
 - If either the start or end date is not a trading day, your route should return an error (status code 400).
-- As mentioned in class I strongly advise you to add an index to the `stocks` table to make sure that your code is performant.
+- I strongly advise you to add an indexes to the `stocks` table to make sure that your code is performant.
 - All dates will be of the format ['Y-m-d'](https://strftime.org/), as in the previous parts.
 - A trading day is defined as one that is in the dataset. If the date exists in the `stocks` table (e.g., in the original ZIP files), then you should consider it a trading day.
 - No request should take more than a few seconds (say 5). If it does you should add an index to the table to make sure that the query is faster.
 - You can assume that the back-testing window will never be more than 10 days. 
 - You should not include any stock-date combination as an observation unless all of the required dates are there. For example, if `O3` is requested, but the stock was just created in the dataset (such as they just had an IPO) then that stock would _not_ be included as an observation. 
 - Do not use pandas `read_sql` to interface with the database. You are welcome to put data from SQL into a DataFrame, but that action and code must be written by hand.
+- **Testing:** Make sure to add a new test (number 22) which runs a schema and exact test on the results of a specific call to `/api/v4/back_test`.
+
 
 ### MCP Server Implementation
 
@@ -140,30 +142,25 @@ You must implement an MCP (Model Context Protocol) server that exposes your API 
 
 #### MCP Requirements
 
-- The MCP server must expose at least 5 tools that correspond to your API endpoints:
-  - At least 2 tools from your `v1` or `v2` API endpoints
-  - At least 2 tools from your `v3` API endpoints  
-  - At least 1 tool from your `v4` API endpoint (backtesting)
+- The MCP server must expose the following tools that correspond to your API endpoints:
+  - **From v1/v2 API (1 tool required):** 
+    - `/api/v2/{YEAR}` - Get row count for a specific year
+  - **From v3 API (5 tools required):**
+    - `/api/v3/accounts` (GET) - List all accounts
+    - `/api/v3/accounts` (POST) - Create a new account
+    - `/api/v3/accounts/<int>` (GET) - Get stocks owned by an account
+    - `/api/v3/stocks` (POST) - Add stock to an account
+    - `/api/v3/accounts/return/<int>` (GET) - Calculate return for an account
+  - **From v4 API (1 tool required):**
+    - `/api/v4/back_test` (POST) - Run backtesting strategy
 - Each tool must have:
   - A clear, descriptive name
   - A detailed description explaining what the tool does
-  - Proper input schema using JSON Schema
+  - Proper input schema (via type hints and docstrings)
   - Proper error handling
-- The MCP server must be able to communicate with your Flask API (either through the Docker Compose network or HTTP requests).
-- The MCP server should use async/await patterns as appropriate.
-
-#### MCP Server Structure
-
-- Create a new directory for your MCP server code (e.g., `mcp_server/` or `app/mcp/`).
-- Your MCP server should use the official MCP Python SDK.
-- The server should be structured to make it easy to add new tools in the future.
-- Include proper error handling and logging for MCP tool execution.
-
-#### MCP Testing
-
-- You should be able to connect your MCP server to Claude Desktop or Cursor.
-- Document how to configure the MCP client to connect to your server.
-- Provide example queries that demonstrate your MCP tools working.
+- The MCP server must be able to communicate with your tools.
+- The MCP server should use async/await patterns as appropriate. Please use the code found in [17_MCP](../lecture_examples/17_MCP/) as a framework. Pay close attention to where `await` and `async` are found in the code.
+- Tools should use type aliases.
 
 ### Docker Compose Migration
 
@@ -187,13 +184,14 @@ All Docker commands must now use Docker Compose instead of single-container Dock
   - `make test` should use `docker compose run --rm <service-name> ...`
   - `make autodocs` should use `docker compose run --rm <service-name> ...` (with appropriate command to start autodocs)
   - `make logs-mcp` or similar should use `docker compose logs mcp-server` (or your service name)
-- Your project structure should be organized appropriately for Docker Compose (see `lecture_examples/16_compose` for reference).
-- All environment variables should be defined in the `docker-compose.yml` file's `environment` section for each service.
+- Your project structure should be organized appropriately for Docker Compose (see `lecture_examples/16_compose` and `lecture_examples/17_MCP` for reference).
+- All environment variables should be defined in the `docker-compose.yml` file's `environment` section for each service. Both `RAW_DATA_DIR` and `DATA_241_API_KEY` should be pulled in from the _host_ environment.
 - Port mappings should be defined in the `docker-compose.yml` file's `ports` section for each service.
   - Note: When using `docker compose up`, ports defined in the yml file are automatically mapped.
   - When using `docker compose run`, you have two options: (1) add `-p` flags to the command, or (2) add `--service-ports` flag to use the ports from the yml file.
+  - Do not put port mappings in the Makefile
 - Volume mounts should be defined in the `docker-compose.yml` file.
-- You may add additional services to your `docker-compose.yml` if needed (e.g., for documentation, testing, etc.).
+- You may add additional services to your `docker-compose.yml` if needed (e.g., for documentation, testing, etc.),but they are _not_ required.
 
 ### Final Review
 
@@ -221,7 +219,7 @@ Please correct all of the feedback for Part VI. A portion of the grade will be s
 - We will also verify that the `.pre-commit-config.yaml` is in the repo and able to be installed and used.
 - We will run the `make` commands outlined above and verify that they work according to the standards set out above. All commands must use Docker Compose.
 - We will verify that your `docker-compose.yml` file is properly configured and that all services can be started and stopped correctly.
-- We will run an autograder on the endpoints to make sure that they return the correct data and information. This includes types and casing.
+- We will run an autograder on the endpoints to make sure that they return the correct data and information. This includes types and casing. E.g. _use testing_ to ensure compliance!
 - Your code will also be read over to make sure that it conforms to the standards laid out in class. If you want to receive full credit, make sure that your code has sound logic, is easy to read, maintains a good separation of concerns, and does not violate the DRY principle.
 - Finally, your code will also be read to make sure that all documentation is up to date and that the code has a consistent set of abstraction standards.
 - There should be no `print` statements. Everything should be logged with an _appropriate_ level.

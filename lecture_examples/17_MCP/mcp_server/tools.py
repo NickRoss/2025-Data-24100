@@ -8,67 +8,79 @@ import os
 import httpx
 from fastmcp import FastMCP
 
+from models import (
+    AddPlayerResponse,
+    AllPlayersResponse,
+    DeletePlayerResponse,
+    PlayerDict,
+    PlayerInfo,
+    TeamPlayersResponse,
+)
+
 # Flask API configuration
-FLASK_API_URL = os.getenv("FLASK_API_URL", "http://flask-app:5000")
+FLASK_API_URL = os.environ["FLASK_API_URL"]
 
 # Create FastMCP instance
 mcp = FastMCP("Basketball API Server")
 
 
 @mcp.tool()
-async def get_all_players() -> str:
+async def get_all_players() -> AllPlayersResponse:
     """Get a list of all basketball players in the database.
 
     Players are grouped by team.
 
     Returns:
-        str: Player names, IDs, and team information.
+        AllPlayersResponse: Dictionary with "players" key containing list of player dicts
+            with "id" (int) and "player_name" (str) keys.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{FLASK_API_URL}/api/players")
         response.raise_for_status()
-        result = response.json()
-        return str(result)
+        return response.json()
 
 
 @mcp.tool()
-async def get_player_info(player_id: int) -> str:
+async def get_player_info(player_id: int) -> PlayerInfo:
     """Get detailed information about a specific player by their ID.
 
     Args:
         player_id: The unique ID of the player
 
     Returns:
-        str: Player name, team, college, and statistics.
+        PlayerInfo: Player information including id, player_name,
+            team_abbreviation, college, age, stats (pts, reb, ast), and
+            other fields.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{FLASK_API_URL}/api/players/{player_id}")
         response.raise_for_status()
-        result = response.json()
-        return str(result)
+        return response.json()
 
 
 @mcp.tool()
-async def get_players_by_team(team: str) -> str:
+async def get_players_by_team(team: str) -> TeamPlayersResponse:
     """Get all players for a specific team.
 
     Args:
         team: The 3-letter team abbreviation (e.g., 'LAL', 'WAS', 'BOS')
 
     Returns:
-        str: A list of all players on that team.
+        TeamPlayersResponse: Dictionary keyed by team abbreviation containing list of player
+            dicts with "id" (int) and "player_name" (str) keys.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(
             f"{FLASK_API_URL}/api/teams/players/{team}/list"
         )
         response.raise_for_status()
-        result = response.json()
-        return str(result)
+        return response.json()
 
 
 @mcp.tool()
-async def add_player(player_name: str, team: str, college: str = None) -> str:
+async def add_player(
+    player_name: str, team: str, college: str = None
+) -> AddPlayerResponse:
     """Add a new player to the database.
 
     Args:
@@ -77,7 +89,8 @@ async def add_player(player_name: str, team: str, college: str = None) -> str:
         college: The college the player attended (optional)
 
     Returns:
-        str: Success message and player information.
+        AddPlayerResponse: Dictionary with "message" (str) and "player"
+            (dict with "name", "team", "college" keys) fields.
     """
     async with httpx.AsyncClient() as client:
         payload = {
@@ -89,19 +102,18 @@ async def add_player(player_name: str, team: str, college: str = None) -> str:
             f"{FLASK_API_URL}/api/players", json=payload
         )
         response.raise_for_status()
-        result = response.json()
-        return str(result)
+        return response.json()
 
 
 @mcp.tool()
-async def delete_player(player_id: int) -> str:
+async def delete_player(player_id: int) -> DeletePlayerResponse:
     """Delete a player from the database by their ID.
 
     Args:
         player_id: The unique ID of the player to delete
 
     Returns:
-        str: Success message.
+        DeletePlayerResponse: Dictionary with "message" (str) key.
 
     Note:
         Use get_player_info first to find the player ID.
@@ -111,24 +123,4 @@ async def delete_player(player_id: int) -> str:
             f"{FLASK_API_URL}/api/players/{player_id}"
         )
         response.raise_for_status()
-        result = {"message": f"Player {player_id} deleted successfully"}
-        return str(result)
-
-
-@mcp.tool()
-async def get_players_by_college(college: str) -> str:
-    """Get all players who attended a specific college.
-
-    Args:
-        college: The college name (e.g., 'Duke', 'University of Kentucky')
-
-    Returns:
-        str: Player information grouped by college.
-    """
-    async with httpx.AsyncClient() as client:
-        response = await client.get(
-            f"{FLASK_API_URL}/api/colleges/{college}/players"
-        )
-        response.raise_for_status()
-        result = response.json()
-        return str(result)
+        return {"message": f"Player {player_id} deleted successfully"}

@@ -6,7 +6,7 @@ including listing, adding, deleting, and retrieving player information.
 
 from typing import Any
 
-from flask import jsonify
+from flask import Response, jsonify
 from flask_openapi3 import Tag
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -15,6 +15,21 @@ from app.data_utils.sql_utils import (
     delete_player,
     list_players_per_team_sql,
     player_info_sql,
+)
+from app.models import (
+    AddPlayerResponse as AddPlayerResponseType,
+)
+from app.models import (
+    AllPlayersResponse as AllPlayersResponseType,
+)
+from app.models import (
+    ErrorResponse as ErrorResponseType,
+)
+from app.models import (
+    PlayerDict,
+)
+from app.models import (
+    PlayerInfo as PlayerInfoType,
 )
 
 BASE_URL = "/api/players"
@@ -70,87 +85,138 @@ class ErrorResponse(BaseModel):
     error: str
 
 
+def list_players() -> tuple[Response, int]:
+    """Retrieve all players grouped by team.
+
+    This route handler returns all players in the database, grouped by team.
+
+    Returns:
+        Tuple containing JSON response and HTTP status code.
+    """
+    try:
+        players_list: list[PlayerDict] = list_players_per_team_sql()
+        response: AllPlayersResponseType = {"players": players_list}
+        return jsonify(response), 200
+    except Exception as e:
+        error_msg = f"An error occurred: {str(e)}"
+        error: ErrorResponseType = {"error": error_msg}
+        return jsonify(error), 500
+
+
+def add_player_route(body: PlayerInput) -> tuple[Response, int]:
+    """Add a new player to the database.
+
+    This route handler accepts player information and adds it to the database.
+
+    Args:
+        body: Player input data containing name, team, and optional college
+
+    Returns:
+        Tuple containing JSON response and HTTP status code.
+    """
+    try:
+        data = {
+            "player_name": body.player_name,
+            "team": body.team,
+            "college": body.college,
+        }
+        add_player(data)
+        response: AddPlayerResponseType = {
+            "message": f"Successfully added player: {body.player_name}",
+            "player": {
+                "name": body.player_name,
+                "team": body.team,
+                "college": body.college,
+            },
+        }
+        return jsonify(response), 201
+    except Exception as e:
+        error_msg = f"An error occurred: {str(e)}"
+        error: ErrorResponseType = {"error": error_msg}
+        return jsonify(error), 500
+
+
+def delete_player_route(
+    path: PlayerIdPath,
+) -> tuple[str, int] | tuple[Response, int]:
+    """Delete a player by their ID.
+
+    This route handler deletes a player from the database by their unique ID.
+
+    Args:
+        path: Path parameter containing the player ID
+
+    Returns:
+        Tuple containing empty string and HTTP status code 204 on success,
+        or JSON error response and HTTP status code 500 on error.
+    """
+    try:
+        delete_player(path.player_id)
+        return "", 204
+    except Exception as e:
+        error_msg = f"An error occurred: {str(e)}"
+        error: ErrorResponseType = {"error": error_msg}
+        return jsonify(error), 500
+
+
+def get_player_info(path: PlayerIdPath) -> tuple[Response, int]:
+    """Get detailed information for a specific player.
+
+    This route handler retrieves detailed statistics and information for a
+    player by their unique ID.
+
+    Args:
+        path: Path parameter containing the player ID
+
+    Returns:
+        Tuple containing JSON response and HTTP status code.
+    """
+    try:
+        player_info_list = player_info_sql(path.player_id)
+        if len(player_info_list) != 1:
+            raise Exception("Player ID Unknown")
+        player_info: PlayerInfoType = player_info_list[0]
+        return jsonify(player_info), 200
+    except Exception as e:
+        error_msg = f"An error occurred: {str(e)}"
+        error: ErrorResponseType = {"error": error_msg}
+        return jsonify(error), 500
+
+
 def register_player_routes(app):
     """Register player-related routes with the Flask application.
 
     Args:
         app: OpenAPI application instance
     """
-
-    @app.get(
+    app.get(
         f"{BASE_URL}",
         tags=[players_tag],
         summary="List all players",
         description="Retrieve all players grouped by team",
         responses={"200": PlayerListResponse, "500": ErrorResponse},
-    )
-    def list_players():
-        """Retrieve all players grouped by team."""
-        try:
-            players_list = list_players_per_team_sql()
-            return jsonify({"players": players_list}), 200
-        except Exception as e:
-            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    )(list_players)
 
-    @app.post(
+    app.post(
         f"{BASE_URL}",
         tags=[players_tag],
         summary="Add a new player",
         description="Add a new player to the database",
         responses={"201": PlayerAddedResponse, "500": ErrorResponse},
-    )
-    def add_player_route(body: PlayerInput):
-        """Add a new player to the database."""
-        try:
-            data = {
-                "player_name": body.player_name,
-                "team": body.team,
-                "college": body.college,
-            }
-            add_player(data)
-            return jsonify(
-                {
-                    "message": (
-                        f"Successfully added player: {body.player_name}"
-                    ),
-                    "player": {
-                        "name": body.player_name,
-                        "team": body.team,
-                        "college": body.college,
-                    },
-                }
-            ), 201
-        except Exception as e:
-            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    )(add_player_route)
 
-    @app.delete(
+    app.delete(
         f"{BASE_URL}/<int:player_id>",
         tags=[players_tag],
         summary="Delete a player",
         description="Delete a player by their ID",
         responses={"204": None, "500": ErrorResponse},
-    )
-    def delete_player_route(path: PlayerIdPath):
-        """Delete a player by their ID."""
-        try:
-            delete_player(path.player_id)
-            return "", 204
-        except Exception as e:
-            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    )(delete_player_route)
 
-    @app.get(
+    app.get(
         f"{BASE_URL}/<int:player_id>",
         tags=[players_tag],
         summary="Get player information",
         description="Get detailed information for a specific player",
         responses={"200": PlayerInfoResponse, "500": ErrorResponse},
-    )
-    def get_player_info(path: PlayerIdPath):
-        """Get detailed information for a specific player."""
-        try:
-            player_info = player_info_sql(path.player_id)
-            if len(player_info) != 1:
-                raise Exception("Player ID Unknown")
-            return jsonify(player_info[0]), 200
-        except Exception as e:
-            return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    )(get_player_info)

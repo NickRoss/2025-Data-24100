@@ -15,14 +15,6 @@ All services communicate over a shared Docker network (`bball-network`).
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- Set the `RAW_DATA_DIR` environment variable to point to your raw data directory
-- Optionally set `DATA_241_API_KEY` for API authentication
-
-Example:
-```bash
-export RAW_DATA_DIR=/path/to/your/data
-export DATA_241_API_KEY=your-api-key-here
-```
 
 ## Quick Start
 
@@ -39,10 +31,10 @@ export DATA_241_API_KEY=your-api-key-here
    ```
 
 3. **Access the services:**
-   - Flask API: http://localhost:4000
-   - Swagger UI: http://localhost:8081
-   - API Documentation: http://localhost:4000/docs
-   - MCP Server: http://localhost:3000
+   - Flask API: `http://localhost:4000`
+   - Swagger UI: `http://localhost:8081`
+   - API Documentation: `http://localhost:4000/docs`
+   - MCP Server: `http://localhost:3000`
 
 4. **Connect to your AI assistant** (see [Configuration](#connecting-mcp-server-to-ai-assistants))
    - The AI assistant will start the MCP server automatically when needed
