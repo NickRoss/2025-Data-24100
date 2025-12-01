@@ -2,17 +2,10 @@ COMPOSE_SERVICE=flask-app
 MCP_SERVICE=mcp-server
 DB_PATH=/app/data/bball.db
 
-.PHONY=help build up down restart ps flask mcp swagger interactive notebook \
+.PHONY=build up down restart ps flask mcp swagger interactive notebook \
 	db_clean db_create db_load db_rm db_interactive \
 	autodoc test logs logs-flask logs-mcp logs-swagger \
 	mcp-test mcp-interactive
-
-.DEFAULT_GOAL := help
-
-help: ## Show this help message
-	@echo "Available commands:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | \
-		awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
 
 # Docker Compose Management
 build: ## Build all Docker images
@@ -30,44 +23,44 @@ restart: down up ## Restart all services
 flask: build ## Start Flask app only
 	docker compose up flask-app
 
-interactive: ## Open bash shell in Flask container
+interactive: build ## Open bash shell in Flask container
 	docker compose run --rm $(COMPOSE_SERVICE) /bin/bash
 
-notebook: ## Run Jupyter notebook server (port 8888)
+notebook: build ## Run Jupyter notebook server (port 8888)
 	docker compose run --rm -p 8888:8888 $(COMPOSE_SERVICE) \
 		uv run jupyter notebook --allow-root --no-browser \
 		--port 8888 --ip=0.0.0.0
 
-mcp-interactive: ## Open bash shell in MCP server container
+mcp-interactive: build ## Open bash shell in MCP server container
 	docker compose run --rm $(MCP_SERVICE) /bin/bash
 
 # Database Commands
-db_create: ## Create database schema
-	docker compose run --rm $(COMPOSE_SERVICE) \
+db_create: build ## Create database schema
+	docker compose run --rm flask-app \
 		uv run python /app/app/data_utils/db_manage.py db_create
 
-db_load: ## Load data into database
+db_load: build ## Load data into database
 	docker compose run --rm $(COMPOSE_SERVICE) \
 		uv run python /app/app/data_utils/db_manage.py db_load
 
-db_rm: ## Remove all data from database
+db_rm: build ## Remove all data from database
 	docker compose run --rm $(COMPOSE_SERVICE) \
 		uv run python /app/app/data_utils/db_manage.py db_rm
 
-db_clean: ## Clean the database
+db_clean: build ## Clean the database
 	docker compose run --rm $(COMPOSE_SERVICE) \
 		uv run python /app/app/data_utils/db_manage.py db_clean
 
-db_interactive: ## Open interactive SQLite shell
+db_interactive: build ## Open interactive SQLite shell
 	docker compose run --rm -it $(COMPOSE_SERVICE) \
 		sqlite3 -column -header $(DB_PATH)
 
 # Documentation and Testing
-autodoc: ## Serve MkDocs documentation (port 4040)
+autodoc: build ## Serve MkDocs documentation (port 4040)
 	docker compose run --rm -p 4040:4040 $(COMPOSE_SERVICE) \
 		uv run mkdocs serve --dev-addr 0.0.0.0:4040 -f /app/api-docs/mkdocs.yml
 
-test: ## Run pytest with coverage
+test: build ## Run pytest with coverage
 	docker compose run --rm $(COMPOSE_SERVICE) \
 		uv run pytest --cov=app /app/test/test.py --cov-report=term-missing -v
 
