@@ -277,13 +277,20 @@ if __name__ == "__main__":
 Key points:
 - Imports the `mcp` instance from `tools.py`
 - Tools are already registered via decorators
-- Always runs in HTTP/SSE mode (server runs continuously)
+- Runs in HTTP/SSE mode (server runs continuously on port 3000)
 - AI assistants connect via URL at `http://localhost:3000/sse`
 - No command-line arguments needed
+
+**Note:** MCP servers can run in different transport modes (stdio vs HTTP/SSE). We use HTTP/SSE mode here because it's easier to debug and works well with Docker Compose. We'll explain both modes in Lecture 18.
 
 ## Tool Definitions with Decorators
 
 Tools are defined in `tools.py` using the `@mcp.tool()` decorator pattern. We also use **type aliases** from a separate `models.py` file to document the structure of responses.
+
+**Note:** The tool functions use `async def` and `httpx` for making HTTP requests to the Flask API. We'll explain async programming and httpx in detail in the next lecture (Lecture 18). For now, just understand that:
+- Tools are async functions (they use `async def`)
+- They use `httpx.AsyncClient()` to make HTTP requests
+- The `await` keyword waits for the HTTP request to complete
 
 **models.py (type aliases):**
 ```python
@@ -326,7 +333,7 @@ async def get_all_players() -> AllPlayersResponse:
 - Tools are automatically registered when the decorator runs
 - Responses use **type aliases** from `models.py` to document structure
 - FastMCP uses these type hints to build better JSON Schemas
-- Functions still use `httpx` to call the Flask API
+- Tools are async functions that use `httpx` to make HTTP requests to the Flask API (see Lecture 18 for details on async/httpx)
 - Type aliases make the code more readable and help FastMCP understand response structures
 
 **How decorators register tools:**
@@ -400,195 +407,3 @@ Benefits of using type aliases in this context:
   - No conversion needed - `response.json()` returns a dict that matches our type aliases.
 
 The key idea: **use types to make tools predictable and well-documented.** We use type aliases to give FastMCP (and the AI) as much structure as possible while keeping the code simple and directly compatible with JSON responses.
-
-## Understanding httpx
-
-`httpx` is a modern HTTP client library for Python - think of it as the async-compatible version of `requests`.
-
-**Why not use `requests`?**
-
-```python
-# requests - synchronous, blocks
-import requests
-response = requests.get("http://api.example.com/data")  # Waits here
-```
-
-```python
-# httpx - asynchronous, doesn't block
-import httpx
-async with httpx.AsyncClient() as client:
-    response = await client.get("http://api.example.com/data")  # Can do other work
-```
-
-**Key httpx features:**
-
-1. **Async support** - Works with async/await
-2. **Context manager** - Automatically manages connections
-3. **Similar API to requests** - Easy to learn if you know requests
-
-**Using httpx in our tools:**
-
-```python
-async with httpx.AsyncClient() as client:
-    response = await client.get(f"{FLASK_API_URL}/api/players/{player_id}")
-    response.raise_for_status()  # Raises exception if 4xx or 5xx
-    result = response.json()     # Parse JSON response
-    return str(result)
-```
-
-Breaking it down:
-
-- `async with httpx.AsyncClient() as client:` - Creates HTTP client, closes when done
-- `await client.get(...)` - Makes HTTP GET request, waits for response
-- `response.raise_for_status()` - Throws error if request failed
-- `response.json()` - Parses JSON response body
-- `str(result)` - Converts to string for AI to read
-
-
-## Async Programming Basics
-
-**What problem does async solve?**
-
-Synchronous (blocking) code:
-```python
-def process_requests():
-    data1 = call_api()        # Wait 2 seconds
-    result1 = process(data1)  # Wait 1 second
-    data2 = call_api()        # Wait 2 seconds
-    result2 = process(data2)  # Wait 1 second
-    # Total time: 6 seconds
-```
-
-Asynchronous (non-blocking) code:
-```python
-async def process_requests():
-    data1_task = asyncio.create_task(call_api())  # Start, don't wait
-    data2_task = asyncio.create_task(call_api())  # Start, don't wait
-    
-    data1 = await data1_task  # Get result when ready
-    data2 = await data2_task  # Get result when ready
-    # Total time: ~2 seconds (both ran at same time!)
-```
-
-**Async keywords:**
-
-- **`async def`** - Defines an async function (coroutine)
-- **`await`** - Waits for an async operation to complete (can only use inside `async def` functions)
-- **`async with`** - Async context manager
-
-Example:
-```python
-async def my_function():
-    return "result"
-
-result = await my_function()  # Pause here until done
-
-async with httpx.AsyncClient() as client:
-    response = await client.get("http://example.com")
-    # Client is automatically closed
-```
-
-**When to use async:**
-
-Use async for:
-- Making HTTP requests (like our MCP tools)
-- Querying databases
-- Reading/writing files
-- Any I/O-bound operation
-
-Don't use async for:
-- CPU-bound operations (calculations, data processing)
-- Simple scripts that only do one thing at a time
-
-**Common async patterns:**
-
-Pattern 1 - Making one request:
-```python
-async def get_data():
-    async with httpx.AsyncClient() as client:
-        response = await client.get("http://api.example.com/data")
-        return response.json()
-```
-
-Pattern 2 - Making multiple requests sequentially:
-```python
-async def get_player_and_team(player_id):
-    async with httpx.AsyncClient() as client:
-        player = await client.get(f"/api/players/{player_id}")
-        team = await client.get(f"/api/teams/{player.json()['team']}")
-        return player.json(), team.json()
-```
-
-Pattern 3 - Making multiple requests concurrently:
-```python
-async def get_multiple_players(player_ids):
-    async with httpx.AsyncClient() as client:
-        tasks = [client.get(f"/api/players/{pid}") for pid in player_ids]
-        responses = await asyncio.gather(*tasks)
-        return [r.json() for r in responses]
-```
-## Connecting to AI Assistants
-
-Once your MCP server is running via `make start-all`, you can connect it to AI assistants like Claude Desktop or Cursor using HTTP/SSE.
-
-**Note:** Some AI assistants require HTTPS instead of HTTP. Our local setup uses HTTP, which works with Cursor and Claude Desktop (via mcp-remote). For production deployments, you would need HTTPS.
-
-**Method 1: HTTP/SSE with Direct URL (Simplest)**
-
-If your MCP server is running continuously (via `make start-all`), you can connect directly via URL.
-
-Cursor configuration (`~/.cursor/mcp.json` in your home directory, not project root):
-```json
-{
-  "mcpServers": {
-    "basketball-api": {
-      "url": "http://localhost:3000/sse",
-      "description": "Basketball API MCP Server"
-    }
-  }
-}
-```
-
-**Method 2: HTTP/SSE with mcp-remote (Claude Desktop)**
-
-`mcp-remote` is an npm package that wraps HTTP/SSE connections in a stdio interface for Claude Desktop. You will need to install this separately in order to use it.
-
-Install mcp-remote:
-```bash
-npm install -g mcp-remote
-```
-
-Configure Claude Desktop. This file needs to go into Claude's configuration file. On my machine that can be found at: `~/Library/Application Support/Claude/claude_desktop_config.json`
-
-```json
-{
-  "mcpServers": {
-    "basketball-api": {
-      "command": "mcp-remote",
-      "args": [
-        "http://localhost:3000/sse"
-      ]
-    }
-  }
-}
-```
-
-**Cursor-specific verification:**
-
-1. Start the services: `cd lecture_examples/17_MCP && make start-all`
-2. Create/edit config file: `mkdir -p ~/.cursor && nano ~/.cursor/mcp.json`
-3. Add configuration (see JSON above)
-4. Restart Cursor completely (not just reload window)
-5. Verify connection: Open a new chat and ask "What MCP tools do you have available?"
-
-**Claude Desktop-specific verification**
-
-1. Install MCP Remote (as above)
-2. Edit/Create a configuration file (see above). Configuration file locations are:
-  - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
-  - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
-  - Linux: `~/.config/Claude/claude_desktop_config.json`
-3. Add the configuration information from above to the file
-4. Make sure the services are started
-5. Restart Claude Desktop after configuration
-

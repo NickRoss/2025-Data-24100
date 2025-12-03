@@ -1,0 +1,248 @@
+/* Base styling */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 12pt;
+  line-height: 1.6;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  color: #333;
+}
+
+/* Headings */
+h1 {
+  font-size: 2em;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 0.3em;
+}
+
+h2 {
+  font-size: 1.5em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+h3 {
+  font-size: 1.25em;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+}
+
+/* Lists with extra spacing between bullets */
+ul, ol {
+  padding-left: 2em;
+}
+
+ul li, ol li {
+  margin-bottom: 0.8em;
+}
+
+/* Nested lists */
+ul ul, ol ol, ul ol, ol ul {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Code blocks */
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 15px;
+  overflow-x: auto;
+  font-size: 11pt;
+}
+
+code {
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11pt;
+}
+
+pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Tables */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f5f5f5;
+  font-weight: bold;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid #ddd;
+  padding-left: 1em;
+  margin-left: 0;
+  color: #666;
+}
+
+/* Links */
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Images */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Mermaid diagrams */
+.mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5em 0;
+  background-color: transparent;
+  border: none;
+  padding: 0;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Divs with centered content */
+div[align="center"] {
+  text-align: center;
+  margin: 1.5em 0;
+}
+
+/* Print-specific styles */
+@media print {
+  body {
+    font-size: 11pt;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.5in;
+    color: #000;
+  }
+
+  /* Adjust margins for paper */
+  @page {
+    margin: 0.75in;
+  }
+
+  /* Prevent page breaks in awkward places */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  pre, blockquote, table {
+    page-break-inside: avoid;
+  }
+
+  ul, ol {
+    page-break-before: avoid;
+  }
+
+  /* Reduce spacing for print */
+  ul li, ol li {
+    margin-bottom: 0.5em;
+  }
+
+  /* Ensure links show their URLs */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Don't print URLs for anchor links */
+  a[href^="#"]:after {
+    content: "";
+  }
+
+  /* Better code block printing */
+  pre {
+    border: 1px solid #999;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Optimize table printing */
+  table {
+    font-size: 10pt;
+  }
+
+  /* Remove background colors to save ink */
+  pre, code {
+    background-color: transparent;
+    border: 1px solid #ccc;
+  }
+
+  table th {
+    background-color: #f0f0f0;
+  }
+
+  /* Page break helpers */
+  .page-break {
+    page-break-before: always;
+  }
+
+  .no-print {
+    display: none;
+  }
+
+  /* Ensure SVGs and Mermaid diagrams print */
+  svg {
+    max-width: 100%;
+    page-break-inside: avoid;
+  }
+
+  /* Keep mermaid diagrams on a single page with scaling */
+  .mermaid {
+    page-break-inside: avoid !important;
+    page-break-before: auto;
+    page-break-after: auto;
+    display: block !important;
+    max-height: 9in; /* Fit within standard page height minus margins */
+    overflow: visible;
+    transform-origin: top center;
+  }
+
+  /* Force visibility of dynamically generated content */
+  .mermaid svg {
+    display: block !important;
+    visibility: visible !important;
+    max-height: 9in !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  /* Scale down large diagrams to fit on one page */
+  .mermaid svg[height] {
+    max-height: 9in !important;
+  }
+
+  /* Prevent page breaks before diagram heading */
+  h3 + .mermaid,
+  h2 + .mermaid,
+  h1 + .mermaid {
+    page-break-before: avoid;
+  }
+}

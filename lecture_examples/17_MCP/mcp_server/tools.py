@@ -30,8 +30,8 @@ async def get_all_players() -> AllPlayersResponse:
     Players are grouped by team.
 
     Returns:
-        AllPlayersResponse: Dictionary with "players" key containing list of player dicts
-            with "id" (int) and "player_name" (str) keys.
+        AllPlayersResponse: Dictionary with "players" key containing list of
+            player dicts with "id" (int) and "player_name" (str) keys.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(f"{FLASK_API_URL}/api/players")
@@ -65,8 +65,8 @@ async def get_players_by_team(team: str) -> TeamPlayersResponse:
         team: The 3-letter team abbreviation (e.g., 'LAL', 'WAS', 'BOS')
 
     Returns:
-        TeamPlayersResponse: Dictionary keyed by team abbreviation containing list of player
-            dicts with "id" (int) and "player_name" (str) keys.
+        TeamPlayersResponse: Dictionary keyed by team abbreviation containing
+            list of player dicts with "id" (int) and "player_name" (str) keys.
     """
     async with httpx.AsyncClient() as client:
         response = await client.get(
