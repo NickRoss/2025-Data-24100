@@ -378,7 +378,6 @@ In our MCP tools we use **type hints** and **type aliases** to make our code cle
 
 In `models.py` and `tools.py` we use:
 
-- Simple type hints like `player_id: int` and `team: str`
 - Type aliases to document dictionary structures:
   - `PlayerDict = dict[str, int | str]` - simple player dict with id and name
   - `PlayerInfo = dict[str, Any]` - detailed player information (all fields)
