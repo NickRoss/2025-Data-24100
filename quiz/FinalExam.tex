@@ -1,0 +1,373 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage, fancyhdr, ifthen, amssymb, amsfonts, amsmath, booktabs}
+\usepackage{tabularx}
+\usepackage{multicol}
+\usepackage[margin=0.25in]{geometry}
+\usepackage{forest}
+\usepackage{textcomp}
+\usepackage{upquote}
+\usepackage{colortbl}
+\usepackage{tcolorbox}
+
+\begin{document}
+
+
+\noindent \textbf{Instructions:} \begin{itemize}
+\item When writing python code be careful about spacing / indents. Leave enough room that it is obvious when you want things indented. 
+\item You should pull off the first pages of the exam to use as reference.
+\item Make sure to write legibly.
+\item Please write your name on the top of the real exam page.
+\item You will have one hour to complete the exam.
+\item You are allowed to use commands not covered in class, but if they do not work as expected on my computer they will not receive full credit.
+\end{itemize}
+
+{\bf Example Flask App }
+\\
+{\color{lightgray}\hrule}
+
+\begin{verbatim}
+from flask import Flask, request, jsonify, Response
+import os
+
+app = Flask(__name__)
+
+@app.route('/api/students/<string:student_name>', methods=['GET'])
+def get_student_major(student_name):
+    student_majors = {"sarah": "computer_science", "mike": "mathematics", "emma": "computer_science"}
+    result_dict = {}
+    if student_name in student_majors:
+        result_dict[student_name] = student_majors[student_name]
+        return jsonify(result_dict), 200
+    
+    return jsonify({"error": "Student not found"}), 404
+
+@app.route('/api/students/<string:student_name>/info', methods=['GET'])
+def get_student_info(student_name):
+    student_data = registrar_api_call(student_name)
+    # Returns a tuple of the form: (name (string), year (int), gpa (float))
+    # Ex: ("Sarah", 3, 3.75) 
+    # If the student does not exist it returns None
+    
+    # CODE GOES HERE
+
+@app.route('/api/students/<int:student_id>', methods=['GET'])
+def get_student_by_id(student_id):
+    api_key = os.environ.get('API_KEY')
+    if not api_key:
+        return jsonify({"error": "API key missing"}), 500
+    return jsonify({"id": student_id, "key_set": True}), 200
+
+@app.route('/api/students', methods=['POST'])
+def create_student():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data"}), 400
+    name = data.get('name')
+    if not name:
+        return jsonify({"error": "Name required"}), 400
+    return jsonify({"message": f"Created {name}"}), 201
+\end{verbatim}
+{\color{lightgray}\hrule}
+
+\newpage
+
+% Top row with two boxes
+\noindent\begin{minipage}[t]{0.48\textwidth}
+\begin{tcolorbox}
+\begin{forest}
+  for tree={
+    font=\ttfamily,
+    grow'=0,
+    child anchor=west,
+    parent anchor=south,
+    anchor=west,
+    calign=first,
+    edge path={
+      \noexpand\path [draw, \forestoption{edge}]
+      (!u.south west) +(7.5pt,0) |- node[fill,inner sep=1.25pt] {} (.child anchor)\forestoption{edge label};
+    },
+    before typesetting nodes={
+      if n=1
+        {insert before={[,phantom]}}
+        {}
+    },
+    fit=band,
+    before computing xy={l=15pt},
+  }
+[\underline{/}
+  [Dockerfile]
+  [makefile]
+  [pyproject.toml]
+  [\underline{app}
+    [app.py]
+  ]
+  [\underline{log\_files}
+        [2025.03.11\_app.log]
+        [2025.03.12\_app.log]
+        [2025.03.13\_app.log]
+        [2025.03.14\_app.log]
+        [2025.03.15\_app.log]
+        [2025.03.16\_app.log]                
+]
+  [\underline{files}
+    [\underline{archive}
+      [file1.pdf]
+      [file2.pdf]
+      [image1.png]
+      [image2.png]
+    ]
+    [\underline{processed}
+          [final.pdf]]
+  ]
+]
+\end{forest}
+\end{tcolorbox}
+\end{minipage}%
+\hfill%
+\begin{minipage}[t]{0.48\textwidth}
+\begin{tcolorbox}
+\begin{verbatim}
+FROM astral/uv:python3.13-bookworm
+
+WORKDIR /project
+COPY pyproject.toml .
+
+RUN uv venv
+RUN uv sync
+
+CMD ["uv", "run", "python", "app/app.py"]
+
+\end{verbatim}
+\end{tcolorbox}
+\end{minipage}
+
+\vspace{1cm}
+
+{\bf Makefile Example} \\
+% Bottom box for makefile
+\noindent\begin{tcolorbox}
+\begin{verbatim}
+IMAGE_NAME=student_api
+
+.PHONY=build interactive run
+
+build:
+        docker build . -t $(IMAGE_NAME)
+
+interactive: build
+        docker run -it -v $(shell pwd):/project/files $(IMAGE_NAME) /bin/bash
+
+run: build
+        docker run -p 4000:5000 -v $(shell pwd):/project/files $(IMAGE_NAME)
+
+\end{verbatim}
+\end{tcolorbox}
+
+\newpage
+
+
+\noindent {\bf Name: } $\rule{10cm}{0.15mm}$
+
+\section*{Group / Peer Review}
+
+Please list the names of your project group members and indicate what percentage of the work each person contributed. {\bf The total percent should be roughly 100\%}. If there are any comments you would like to state about your group dynamics, please use this space.  You are welcome, but not required to add notes.
+
+
+
+\vspace{2cm}
+
+\begin{table}[ht!]
+\centering
+\begin{tabular}{l | l}
+\toprule
+Member Name (include yourself) & Percentage of Work \\
+\midrule \\
+            &                    \\ \midrule \\
+            &                    \\ \midrule \\
+            &                    \\ \midrule \\
+            &                    \\ \midrule \\
+            &                    \\ \midrule \\
+            &                    \\ \midrule 
+\bottomrule 
+\end{tabular}
+\end{table}
+
+
+\vspace{2cm}
+
+Additional notes or comments: 
+
+\clearpage
+
+\begin{enumerate}
+
+\item Using \texttt{bash} commands please complete the following. You are currently in the \texttt{/log\_files} directory. The files contain logs generated by a custom logger, similar to what was demonstrated in class. Each file contains logs from the date specified in the file name. You can see an example of the format of the logs in the sample below.
+
+{\bf Example Log File}
+
+\begin{verbatim}
+2025-03-15 14:22:18 | ERROR | ERROR205 File Format
+2025-03-15 14:22:45 | INFO | GET request received at /api/students/sarah/info
+2025-03-15 14:23:10 | INFO | GET request received at /api/students/123
+2025-03-15 14:23:35 | ERROR | GET request received at /api/students/john
+2025-03-15 14:24:01 | ERROR | ERROR205 File Format
+2025-03-15 14:24:15 | ERROR | ERROR042 Database Connection
+2025-03-15 14:24:18 | WARNING | Retrying database connection
+2025-03-15 14:24:22 | INFO | Database connection restored
+2025-03-15 14:24:45 | INFO | GET request received at /api/students/mike/info
+2025-03-15 14:25:10 | WARNING | Rate limit approaching
+2025-03-15 14:25:30 | WARNING | High memory usage detected
+2025-03-15 14:26:15 | ERROR | ERROR042 Database Connection
+\end{verbatim}
+
+\begin{enumerate}
+	\item (5 Points) Using \texttt{bash} commands, create a file (\texttt{warnings.log}, in the current directory) which contains all lines that have \texttt{WARNING} written in them (this should be \emph{case sensitive}) from the file \texttt{2025.03.15\_app.log}. E.g. we want a file which contains only those lines.
+\vspace{5cm}
+	\item (5 Points) Using \texttt{bash} commands, print to the screen the \emph{number} of lines that contain \texttt{ERROR042} in the log file \texttt{2025.03.15\_app.log}.
+\vspace{5cm}
+	\item (5 Points) Some log entries incorrectly contain both ERROR and WARNING in the same line. For example: \\ \\
+ \texttt{2025-03-15 14:24:18 | ERROR | WARNING: some problem} \\ \\
+ Using \texttt{bash} commands, print to the screen the number of lines in \texttt{2025.03.15\_app.log} that contain \texttt{ERROR} but do \emph{not} contain \texttt{WARNING}.
+\vspace{5cm}
+
+\end{enumerate}
+
+\item (5 Points) When we run \texttt{make interactive} what is the full path, \emph{inside the container}, for the file \texttt{final.pdf}?
+
+\vspace{2cm}
+
+\item (2 Points) Fill in the blank: \texttt{requirements.txt} is to \texttt{pip} as \rule{3cm}{0.15mm} is to \texttt{uv}.
+
+
+\vspace{1cm}
+
+\item (5 Points) Your current working directory is \texttt{/log\_files}, using a \emph{relative} path and a single command (do not change directories) please list all files that end with \texttt{.pdf} in the \texttt{files/archive} directory.
+
+\vspace{5cm}
+
+
+
+\item Looking at our flask server code above, please write what is returned when the following calls are made. Write both the body and the status code.
+
+
+\begin{enumerate}
+\item (3 Points) A GET request to \texttt{/api/students/mike}
+\vspace{4cm}
+\item (3 Points) A GET request to \texttt{/api/students/david}
+\vspace{4cm}
+\end{enumerate}
+
+
+
+\item (1 Point) What does DRY stand for when speaking about code quality?
+
+\newpage 
+
+
+\item (5 Points) The code for \texttt{/api/students/<string:student\_name>/info} needs to be completed (see above). The code should return:
+\begin{itemize}
+	\item If the student exists it should return a JSON object of the form: \\ \texttt{\{"name": NAME OF STUDENT, "year": YEAR OF STUDENT\}} with a status code of 200.
+	\item If the student does not exist it should return an error message in JSON format (you can decide what it says) with a status code of 404.
+	\item You do not need to write any lines already present in the template above.
+\end{itemize}
+
+
+\vspace{6cm} 
+
+
+
+\item (5 Points) Please write a unit test (using \texttt{assert}) for the following function. This function only needs to have one test condition. Please name the function \texttt{test\_calculate\_score}.
+
+
+\begin{verbatim}
+def calculate_score(base, multiplier, bonus):
+    return (base * multiplier) + bonus
+\end{verbatim}
+
+
+\vspace{5cm}
+
+\item (2 Points) What is the difference between an LLM and an AI Agent? (3 sentences or less)
+
+\vspace{5cm}
+
+\item (2 Points) What is the primary difference between Docker and Docker Compose? (1 sentence)
+
+\vspace{5cm}
+
+
+\item (5 Points) We want to create a function that returns a piecewise function. A piecewise function $f(x)$ can be defined mathematically as:
+\[
+\text{piecewise}(x) = \begin{cases}
+\text{positive}(x) & \text{if } x \geq \text{cutoff} \\
+\text{negative}(x) & \text{if } x < \text{cutoff}
+\end{cases}
+\]
+where $\text{cutoff}$ is the breakpoint, $\text{positive}$ is the function used for values greater than or equal to the breakpoint, and $\text{negative}$ is the function used for values less than the breakpoint.
+
+Please write a function \texttt{piecewise} which takes in three arguments: (1) \texttt{positive\_func}, (2) \texttt{negative\_func}, and (3) \texttt{cutoff}. The function should return a new function. When this returned function is called with \texttt{value}, it should return \texttt{positive\_func(value)} if \texttt{value $\geq$ cutoff}, otherwise it should return \texttt{negative\_func(value)}. You can assume that both \texttt{positive\_func} and \texttt{negative\_func} only take a single argument.
+
+For example, if \texttt{square} squares a number and \texttt{abs} returns the absolute value, then \texttt{result\_func = piecewise(square, abs, 0)} should create a function such that \texttt{result\_func(5)} returns \texttt{25} and \texttt{result\_func(-3)} returns \texttt{3}.
+
+
+\vspace{6cm}
+
+
+
+\item (5 Points) We want to set an \texttt{API\_KEY} environment variable for our Flask application running in Docker. There are two approaches we are considering:
+
+\begin{enumerate}
+\item Add \texttt{ENV API\_KEY=abc123} to the Dockerfile
+\item Pass \texttt{-e API\_KEY=abc123} when running \texttt{docker run}
+\end{enumerate}
+
+Explain the key difference between these two approaches. What are the practical implications of this difference? (2-3 sentences)
+
+\vspace{3cm}
+
+\item (2 Points) When using autodocs systems like MkDocs, what is the primary part of the Python code that is automatically extracted and included in the documentation? (One sentence or less)
+
+\vspace{2cm}
+
+
+\item (2 Points) What is the difference between a unit test and an integration test? (1-2 sentences)
+
+\vspace{2cm}
+
+\item (2 points) What does MCP stand for?
+\vspace{2cm}
+
+\item (2 points) Explain how an MCP would be used (2-3 sentences).
+\vspace{3cm}
+
+
+\item (5 Points) Write a function called \texttt{apply\_functions} that takes a list of functions and a value, and returns a list of results from applying each function to the value in order. For example, if you have functions \texttt{square} (which squares a number) and \texttt{double} (which doubles a number), calling \texttt{apply\_functions([square, double], 5)} should return \texttt{[25, 10]}.
+
+\vspace{6cm}
+
+\item (5 Points) Write a function called \texttt{apply\_to\_all} that takes a list of functions and a list of values, and returns a list of results. For each value in the input list, apply all functions to that value and collect the results. The function should return a list of lists, where each inner list contains the results of applying all functions to one value. For example, if you have functions \texttt{square} and \texttt{double}, calling \texttt{apply\_to\_all([square, double], [2, 3])} should return \texttt{[[4, 4], [9, 6]]} (square(2)=4, double(2)=4 for first value; square(3)=9, double(3)=6 for second value).
+
+\newpage
+
+\item (5 Points) Write a Flask route \texttt{/api/students/grades} that accepts a POST request. The request body should contain JSON with a \texttt{student\_id} (required) and any number of course grades as key-value pairs (e.g., \texttt{\{"student\_id": 123, "math": 85, "science": 92\}}). 
+
+Assume there is a helper function \texttt{validate\_student\_id(student\_id)} that returns \texttt{True} if the student ID is valid, and \texttt{False} otherwise. Use this function to validate the \texttt{student\_id}. If validation fails, return status 400 with an error message.
+
+If validation passes, the route should:
+\begin{itemize}
+    \item Extract all course grades (all keys except \texttt{student\_id})
+    \item Return a JSON response with status 200 containing: \texttt{\{"student\_id": ID, "courses": [LIST OF COURSE NAMES], "grades": [LIST OF GRADE VALUES]\}}
+\end{itemize}
+For example, if the input is \texttt{\{"student\_id": 123, "math": 85, "science": 92\}}, the response should be \texttt{\{"student\_id": 123, "courses": ["math", "science"], "grades": [85, 92]\}}.
+
+\vspace{7cm}
+
+
+\item (5 Points) Please write a function \texttt{logger\_helper} that accepts a function parameter named \texttt{func} as input. You can assume that \texttt{func} accepts zero arguments. The function should act similar to a logging decorator, but simpler. It should use \texttt{print} to print \texttt{"Function XXX started"} before the function starts, making sure to substitute the name of the function for \texttt{XXX}, and then should print \texttt{"Function Complete"} when the function ends. This does not need to use Python's logging module or any specific wraps functionality. 
+
+
+
+\end{enumerate}
+
+
+\end{document}

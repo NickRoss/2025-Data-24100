@@ -29,8 +29,8 @@ In this section we will add a `v4` route which will backtest a trading strategy 
 Given a base URL of `/api/v4/`, implement the following endpoint with the functionality below. Note that all requests need to go through the same authentication as `v1`, `v2`, and `v3` (e.g., using the `DATA-241-API-KEY` environment variable). If the key is invalid or not present in the header, the request should return a status code of 401.
 
 | Endpoint name | Request Type | Request Info | Expected Response | Other Notes |
-| --- | --- | --- | --- | --- | 
-| `back_test` | POST |  Returns the nominal value of a specific trading strategy.  | It should respond with a JSON object of the form: `{ 'return' : "float(2)" \| example: 123.45, 'num_observations': int }`. | More info about the request below. |
+| --- | --- | --- | --- | --- |
+| `back_test` | POST |  Returns the nominal value of a specific trading strategy.  | It should respond with a JSON object of the form: `{ 'return' : "float(2)" \| example: 123.45, 'num_observations': int }` with **status code 200 on success**. | More info about the request below. |
 
 The POST request body should have the following schema:
 
@@ -129,6 +129,7 @@ The other piece of the response is the `num_observations`. This should count the
 - I strongly advise you to add an indexes to the `stocks` table to make sure that your code is performant.
 - All dates will be of the format ['Y-m-d'](https://strftime.org/), as in the previous parts.
 - A trading day is defined as one that is in the dataset. If the date exists in the `stocks` table (e.g., in the original ZIP files), then you should consider it a trading day.
+- **Important:** When calculating historical lookback dates (e.g., O1, O2, C3), you must only use actual trading days from your dataset. Do not assume dates by calendar arithmetic (e.g., "1 day ago" is not necessarily yesterday - it's the previous trading day in your data). All date operations must account for weekends and holidays by querying actual dates from your stocks table. Never query your database with a date that might not exist in your dataset, as this can cause errors.
 - No request should take more than a few seconds (say 5). If it does you should add an index to the table to make sure that the query is faster.
 - You can assume that the back-testing window will never be more than 10 days. 
 - You should not include any stock-date combination as an observation unless all of the required dates are there. For example, if `O3` is requested, but the stock was just created in the dataset (such as they just had an IPO) then that stock would _not_ be included as an observation. 
@@ -162,6 +163,30 @@ You must implement an MCP (Model Context Protocol) server that exposes your API 
 - The MCP server should use async/await patterns as appropriate. Please use the code found in [17_MCP](../lecture_examples/17_MCP/) as a framework. Pay close attention to where `await` and `async` are found in the code.
 - Tools should use type aliases.
 
+#### MCP Library and Configuration
+
+**Required Library:** You must use the `fastmcp` library (not `mcp.server.stdio` or other implementations). Install it with:
+```bash
+uv add fastmcp
+```
+
+Your MCP server should import and use FastMCP:
+```python
+from fastmcp import FastMCP
+
+mcp = FastMCP("Stock API MCP Server")
+```
+
+**Transport Configuration:** Your MCP server must use **SSE (Server-Sent Events) transport** to communicate with clients. The server must be configured to run with the following parameters:
+```python
+if __name__ == "__main__":
+    mcp.run(transport="sse", host="0.0.0.0", port=3000)
+```
+
+- The MCP server should listen on **port 3000**
+- The server must be accessible from outside the container (hence `host="0.0.0.0"`)
+- Using SSE transport allows AI assistants and other clients to connect to your MCP server over HTTP
+
 ### Docker Compose Migration
 
 **Because you now have two services (your Flask API and your MCP server), you must use Docker Compose to manage both services.**
@@ -184,13 +209,17 @@ All Docker commands must now use Docker Compose instead of single-container Dock
   - `make test` should use `docker compose run --rm <service-name> ...`
   - `make autodocs` should use `docker compose run --rm <service-name> ...` (with appropriate command to start autodocs)
   - `make logs-mcp` or similar should use `docker compose logs mcp-server` (or your service name)
+  - `make start-all` should start both services together (Flask API and MCP server) using `docker compose up -d flask-app mcp-server` (or your service names)
 - Your project structure should be organized appropriately for Docker Compose (see `lecture_examples/16_compose` and `lecture_examples/17_MCP` for reference).
 - All environment variables should be defined in the `docker-compose.yml` file's `environment` section for each service. Both `RAW_DATA_DIR` and `DATA_241_API_KEY` should be pulled in from the _host_ environment.
 - Port mappings should be defined in the `docker-compose.yml` file's `ports` section for each service.
+  - Flask app should expose its API port (e.g., `"4000:5000"` to map container port 5000 to host port 4000)
+  - **MCP server must expose port 3000** (e.g., `"3000:3000"`) for SSE transport
   - Note: When using `docker compose up`, ports defined in the yml file are automatically mapped.
   - When using `docker compose run`, you have two options: (1) add `-p` flags to the command, or (2) add `--service-ports` flag to use the ports from the yml file.
   - Do not put port mappings in the Makefile
 - Volume mounts should be defined in the `docker-compose.yml` file.
+  - The MCP server needs access to your Flask API code and/or needs appropriate volume mounts to its own codebase for development
 - You may add additional services to your `docker-compose.yml` if needed (e.g., for documentation, testing, etc.),but they are _not_ required.
 
 ### Final Review
